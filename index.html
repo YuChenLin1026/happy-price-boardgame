@@ -77,7 +77,7 @@ h1, h2, h3, h4 { font-family: var(--font-display); text-wrap: balance; margin: 0
 .rounds i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
 .rounds i.done { background: var(--gold-deep); }
 .rounds i.now { background: var(--gold); box-shadow: 0 0 0 3px rgba(217, 164, 65, 0.25); }
-.rounds span { margin-left: 6px; font-variant-numeric: tabular-nums; }
+.rounds > span { margin-left: 6px; font-variant-numeric: tabular-nums; }
 .stepbar { display: flex; align-items: center; gap: 6px; }
 .steps { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; font-size: 12.5px; }
 .steps li { display: flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 999px; color: var(--text-dim); }
@@ -485,6 +485,120 @@ fieldset.field legend { padding: 0 6px; color: var(--gold-soft); font-family: va
 .dicecell { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--text-dim); }
 .dicecell b { color: var(--gold-soft); font-size: 15px; }
 .epi { background: var(--shade); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-family: var(--font-display); font-weight: 700; line-height: 1.9; }
+
+/* ---------- phones: compact seats on top, the piles in one row, the dock pinned to the bottom ---------- */
+@media (max-width: 600px) {
+  body { font-size: 14px; }
+  .wrap { padding-inline: 10px; padding-block: 8px 10px; }
+  .topbar { gap: 6px 8px; padding-block: 0 8px; }
+  .brand, .lg { display: none; }
+  .rounds > span { margin-left: 4px; }
+  .stepbar { order: 3; flex-basis: 100%; }
+  .steps { font-size: 12px; gap: 2px; }
+  .steps li { padding: 2px 6px; }
+  .rounds { gap: 3px; }
+  .rounds i { width: 6px; height: 6px; }
+  .tools { gap: 3px; }
+  .ibtn, .tbtn { width: 30px; height: 30px; border-radius: 9px; }
+  .tbtn { padding: 0; }
+  .ibtn svg { width: 16px; height: 16px; }
+
+  .table { gap: 8px; grid-template-rows: auto auto auto 1fr auto; grid-template-areas: "tl tr" "tc tc" "bl br" "c c" "dk dk"; }
+  .seat.at-tl, .seat.at-tr, .seat.at-tc, .seat.at-bl, .seat.at-br { align-self: stretch; }
+
+  /* a seat: avatar | name and role, then cash and joy, then the cards in front */
+  .seat { grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 7px; row-gap: 1px; align-items: center; padding: 7px 9px 8px; border-radius: 12px; }
+  .seat .hd, .seat .who2 { display: contents; }
+  .avatar { grid-column: 1; grid-row: 1 / span 2; width: 28px; height: 28px; font-size: 14px; }
+  .seat.active .avatar { transform: scale(1.12); }
+  .startmark { width: 14px; height: 14px; font-size: 8px; left: -6px; right: auto; bottom: -4px; }
+  .seat .nm { grid-column: 2; grid-row: 1; gap: 4px; font-size: 14px; }
+  .seat .nmt { min-width: 2.1em; }
+  .seat .ai { font-size: 9.5px; padding: 0 3px; flex-shrink: 0; }
+  .seat .lamp { width: 8px; height: 8px; }
+  .hand { grid-column: 3; grid-row: 1; margin: 0; align-self: center; }
+  .hand i { width: 7px; height: 10px; }
+  .seat .rl { grid-column: 2; grid-row: 2; justify-self: start; font-size: 11.5px; }
+  .score { grid-column: 2 / 4; grid-row: 2; justify-self: end; }
+  .score span { display: none; }
+  .score b { font-size: 11.5px; }
+  .nums { grid-column: 1 / -1; grid-row: 3; gap: 10px; margin-top: 3px; white-space: nowrap; }
+  .nums .cash { font-size: 17px; }
+  .nums .joy { font-size: 14px; }
+  .seat .last { display: none; }
+  .front { grid-column: 1 / -1; grid-row: 4; min-height: 0; padding-left: 13px; margin-top: 4px; row-gap: 4px; }
+  .front:has(.none) { display: none; }
+  .mini { width: 26px; height: 36px; margin-left: -13px; border-radius: 4px; font-size: 7px; }
+  .mini::before { height: 4px; margin-bottom: 2px; }
+  .mini b { padding: 0 1px; }
+  .mini i { font-size: 6.5px; margin-bottom: 2px; }
+  .mini.token b { font-size: 9px; }
+  .mini.token i { font-size: 8px; }
+
+  /* the middle: all piles in one row, the sky card and the drawn cards below */
+  .center { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "piles piles" "sky stage"; gap: 10px 12px; align-items: start; padding: 10px; border-radius: 16px; }
+  .tableside { display: contents; }
+  .slot { grid-area: sky; }
+  .piles { grid-area: piles; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0 6px; }
+  .pile .stack { width: 38px; height: 53px; border-radius: 5px; }
+  .pile .stack::before, .pile .stack::after { border-radius: 5px; }
+  .pile .stack::before { transform: translate(2px, 2px); }
+  .pile .stack::after { transform: translate(4px, 4px); }
+  .pile .cnt { right: -7px; bottom: -6px; min-width: 18px; padding: 0 4px; font-size: 10px; }
+  .pile .pl-l { margin-top: 7px; font-size: 10.5px; white-space: nowrap; }
+  .bankpile .coinstack { width: 36px; height: 36px; margin-block: 8px 9px; font-size: 15px; }
+  .slot .lbl, .stage .cap { font-size: 11px; margin-bottom: 4px; }
+  .slot .card.sm { width: 76px; min-height: 106px; border-radius: 7px; }
+  .slot .card.sm::after { inset: 20px 3px 3px; }
+  .slot .card.sm .band { font-size: 8.5px; letter-spacing: 0.05em; padding: 3px 2px; }
+  .slot .card.sm .body { padding: 5px; gap: 3px; }
+  .slot .card.sm .ttl { font-size: 12px; }
+  .slot .card.sm .fx { font-size: 9px; line-height: 1.35; }
+  .stage { grid-area: stage; min-height: 176px; gap: 10px; }
+  .stagecards { gap: 10px; }
+  .stage .card, .auc .card { width: 112px; min-height: 157px; }
+  .stage .card .band { font-size: 10px; padding: 4px; }
+  .stage .card .body { padding: 8px; gap: 4px; }
+  .stage .card .ttl { font-size: 15.5px; }
+  .stage .card .amt { font-size: 16px; }
+  .stage .card .joy { font-size: 14px; }
+  .stage .card .fx { font-size: 11px; }
+  .center:has(.auc) .slot { display: none; }
+  .center:has(.auc) .stage { grid-column: 1 / -1; }
+  .auc { gap: 10px; flex-wrap: nowrap; }
+  .bidlist { min-width: 0; gap: 5px; }
+  .bidrow { padding: 5px 8px; gap: 6px; font-size: 13px; }
+  .bidrow.shown .bv { font-size: 15px; }
+
+  .dock { padding: 10px 12px 12px; gap: 6px; border-radius: 12px; max-height: 48vh; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
+  .dock h3 { font-size: 16.5px; }
+  .dock .body { font-size: 13.5px; }
+  .opts { gap: 6px; }
+  .opt { padding: 8px 12px; }
+
+  #toasts { width: calc(100% - 20px); gap: 6px; }
+  .toast { font-size: 12.5px; line-height: 1.5; padding: 7px 10px; gap: 8px; }
+  .toast .t-dot { margin-top: 6px; }
+  .toast:nth-child(n+2) { display: none; }
+  .banner { padding: 12px 24px; }
+  .banner b { font-size: 32px; }
+  .dock .acards { display: none; }
+  /* the final ranking becomes one block per player */
+  .endtbl thead { display: none; }
+  .endtbl, .endtbl tbody { display: block; }
+  .endtbl tr { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; padding: 8px 4px 10px; border-bottom: 1px solid var(--line); }
+  .endtbl td { padding: 0; border: 0; background: none !important; white-space: nowrap; }
+  .endtbl tr.win { background: rgba(217, 164, 65, 0.14); border-radius: 8px; }
+  .endtbl .rk { flex: 0 0 18px; font-family: var(--font-display); font-weight: 900; color: var(--gold-soft); }
+  .endtbl .nm { flex: 1 0 calc(100% - 140px); }
+  .endtbl .tot { flex: 0 0 auto; font-size: 16px; }
+  .endtbl td[data-k] { font-size: 12.5px; text-align: left; }
+  .endtbl td[data-k="現金"] { margin-left: 30px; }
+  .endtbl td[data-k]::before { content: attr(data-k) " "; color: var(--text-dim); }
+  .ov { padding: 16px 10px; }
+  .sheet { padding: 18px 16px; gap: 14px; }
+  .sheet h2 { font-size: 22px; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .card.flip, .card.glow, .bidrow.shown, .pile.pickable .stack, .fist .bill.new, .rolecard, .toast, .nums .cash.up, .nums .cash.down, .seat.active .avatar, .seat .lamp.think, .seat .last.fresh { animation: none; }
@@ -1288,6 +1402,25 @@ function renderAction(o, done) {
     if (first && window.matchMedia('(min-width: 1001px)').matches) first.focus({ preventScroll: true });
   }
   applyPicks();
+  keepStageInView(true);
+}
+// On a phone the table is taller than the screen. When new cards land on the stage, or the dock grows over them,
+// jump the page just enough to show them above the dock. The jump is instant so flying cards still land on target.
+let stageKey = '';
+function keepStageInView(force) {
+  const key = !G ? '' : G.auction ? `a${G.auction.card ? G.auction.card.uid : ''}` : G.stage ? `s${G.stage.caption}${G.stage.card ? G.stage.card.uid : ''}${G.stage.cards ? G.stage.cards.length : ''}` : '';
+  if (key === stageKey && !force) return;
+  stageKey = key;
+  if (!key || !window.matchMedia('(max-width: 600px)').matches) return;
+  const st = document.querySelector('#board .stage');
+  const dock = $('#action');
+  if (!st || !dock) return;
+  const r = st.getBoundingClientRect();
+  const limit = window.innerHeight - dock.offsetHeight - 20;
+  let dy = 0;
+  if (r.bottom > limit) dy = Math.min(r.bottom - limit, r.top - 8);
+  else if (r.top < 0) dy = r.top - 8;
+  if (dy > 0.5 || dy < -0.5) window.scrollBy(0, dy);
 }
 function setActing(i) {
   ACTING = i;
@@ -1352,7 +1485,7 @@ function pileHTML(id, label, n) {
 function renderTop() {
   const r = G ? G.round : 0;
   const ended = G && G.phase === 'end';
-  $('#round').innerHTML = `${[1, 2, 3, 4, 5, 6].map((k) => `<i class="${ended || k < r ? 'done' : k === r ? 'now' : ''}"></i>`).join('')}<span>${!G || r === 0 ? '準備中' : ended ? '遊戲結束' : `第 ${r} / 6 回合`}</span>`;
+  $('#round').innerHTML = `${[1, 2, 3, 4, 5, 6].map((k) => `<i class="${ended || k < r ? 'done' : k === r ? 'now' : ''}"></i>`).join('')}<span>${!G || r === 0 ? '準備中' : ended ? '遊戲結束' : `<span class="lg">第 </span>${r} / 6<span class="lg"> 回合</span>`}</span>`;
   const idx = G ? STEPS.findIndex((s) => s[0] === G.phase) : -1;
   $('#steps').innerHTML = STEPS.map(([, l], i) => `<li class="${i === idx ? 'on' : ''}">${l}</li>`).join('');
 }
@@ -1404,6 +1537,7 @@ function renderBoard() {
     </div>
     <div class="stage">${stage}</div>`;
   applyPicks();
+  keepStageInView(false);
 }
 function renderLog() { $('#log').innerHTML = G ? G.log.map((e) => `<li><span class="r">R${e.r}</span><span>${e.t}</span></li>`).join('') : ''; }
 function render() { syncCounters(); renderTop(); renderPlayers(); renderBoard(); renderLog(); }
@@ -2105,12 +2239,12 @@ function showEnd(lines) {
     <div class="winner"><div class="k">賭局揭曉</div><h2>${winners.map((w) => w.p.name).join('、')} 獲勝！</h2>
       <p class="dim">${winners.length > 1 ? '總分和開心值都相同，一起獲勝。' : `${winners[0].p.role.name}，總分 ${money(winners[0].s.total)}。`}</p></div>
     ${dice ? `<div class="dicerow">${dice}</div>` : ''}
-    <div class="tblwrap"><table class="rtbl">
+    <div class="tblwrap"><table class="rtbl endtbl">
       <thead><tr><th>名次</th><th>玩家</th><th class="r">現金</th><th class="r">拍賣牌價值</th><th class="r">貸款</th><th>開心值</th><th class="r">開心換算</th><th class="r">總分</th></tr></thead>
       <tbody>${rows.map((r) => {
         const p = r.p;
         const joyCards = p.front.reduce((s, c) => s + (c.joy || 0), 0);
-        return `<tr class="${r.rank === 1 ? 'win' : ''}"><td>${r.rank}</td><td class="nm">${p.name}<span class="dim">（${p.role.name}）</span></td><td class="r">${fmt(p.cash)}</td><td class="r">${fmt(r.s.assets)}</td><td class="r">${p.loans ? `−${fmt(p.loans * 6000)}` : '0'}</td><td>${r.s.j}<span class="dim small">（${p.role.joy} ＋ ${joyCards} − ${p.lows}）</span></td><td class="r">${fmt(r.s.jv)}</td><td class="r"><b>${money(r.s.total)}</b></td></tr>`;
+        return `<tr class="${r.rank === 1 ? 'win' : ''}"><td class="rk">${r.rank}</td><td class="nm">${p.name}<span class="dim">（${p.role.name}）</span></td><td class="r" data-k="現金">${fmt(p.cash)}</td><td class="r" data-k="拍賣牌">${fmt(r.s.assets)}</td><td class="r" data-k="貸款">${p.loans ? `−${fmt(p.loans * 6000)}` : '0'}</td><td data-k="開心值">${r.s.j}<span class="dim small">（${p.role.joy} ＋ ${joyCards} − ${p.lows}）</span></td><td class="r" data-k="換算">${fmt(r.s.jv)}</td><td class="r tot"><b>${money(r.s.total)}</b></td></tr>`;
       }).join('')}</tbody></table></div>
     <p class="dim small">總分 ＝ 現金 ＋ 拍賣牌價值 − 貸款 ＋ 開心值 × 1,000。開心值 ＝ 初始開心值 ＋ 面前的 ☺ − 低落牌，最低 0。平手時開心值高的人獲勝。</p>
     <div class="epi">${epi}</div>
@@ -2246,7 +2380,7 @@ $('#rules-close').addEventListener('click', () => { $('#ov-rules').hidden = true
 $('#ov-rules').addEventListener('click', (e) => { if (e.target.id === 'ov-rules') $('#ov-rules').hidden = true; });
 
 /* ================= top bar, drawer, table interactions ================= */
-function syncSpeedBtn() { $('#btn-speed').textContent = `節奏 ${SPEED_LABEL[CFG.speed] || '普通'}`; }
+function syncSpeedBtn() { $('#btn-speed').innerHTML = `<span class="lg">節奏 </span>${SPEED_LABEL[CFG.speed] || '普通'}`; }
 function syncPauseBtn() {
   const b = $('#btn-pause');
   b.classList.toggle('paused', PAUSED);
