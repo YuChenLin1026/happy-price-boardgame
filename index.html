@@ -1,0 +1,2369 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="《快樂有價》天庭賭局：財神 vs 喜神。4–5 人卡牌桌遊的線上試玩版，可熱座或與電腦對戰。">
+<title>快樂有價</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap">
+<style>
+/* Layout: one calm column on a lacquered crimson table. Player seats on top, the table in the middle
+   (piles on the left, the card stage beside them), and a slim decision dock riding the bottom edge.
+   Explanations arrive as short toasts, only the first time or when something happens to you. */
+:root {
+  color-scheme: dark;
+  --lacquer: #360c11;
+  --lacquer-2: #4a1319;
+  --lacquer-3: #5c1a21;
+  --gold: #d9a441;
+  --gold-soft: #f1d59a;
+  --gold-deep: #9a6b1f;
+  --paper: #fbf4e6;
+  --ink: #2a1d1a;
+  --ink-dim: #6b5850;
+  --text: #f6e9d4;
+  --text-dim: #cfae94;
+  --line: rgba(241, 213, 154, 0.18);
+  --shade: rgba(0, 0, 0, 0.22);
+  --fun: #e0674a;
+  --chance: #3f7fb5;
+  --low: #3b8a66;
+  --high: #c4413a;
+  --god: #6e56a6;
+  --auction: #8e1f24;
+  --sky: #3b4a7a;
+  --loan: #2f2f36;
+  --down: #71829b;
+  --pos: #74d6a1;
+  --neg: #ff9d8c;
+  --tip: #9cc0f0;
+  --pos-ink: #2c7a52;
+  --neg-ink: #bf3b31;
+  --seat-1: #efbe4f;
+  --seat-2: #5fc7b3;
+  --seat-3: #ee8fab;
+  --seat-4: #8fb4ff;
+  --seat-5: #c7a2ff;
+  --font-display: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --font-body: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--lacquer);
+  background-image:
+    radial-gradient(ellipse at 50% -20%, rgba(217, 164, 65, 0.18), transparent 55%),
+    radial-gradient(ellipse at 110% 110%, rgba(110, 86, 166, 0.16), transparent 50%);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+}
+button { font: inherit; cursor: pointer; color: inherit; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--gold-soft); outline-offset: 2px; }
+.dim { color: var(--text-dim); }
+.small { font-size: 13px; }
+h1, h2, h3, h4 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+
+/* ---------- top bar ---------- */
+.wrap { padding-inline: 16px; padding-block: 10px 14px; max-width: 1320px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; }
+.topbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding-block: 2px 12px; }
+.brand { font-family: var(--font-display); font-weight: 900; font-size: 22px; color: var(--gold-soft); letter-spacing: 0.14em; }
+.rounds { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--text-dim); }
+.rounds i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.rounds i.done { background: var(--gold-deep); }
+.rounds i.now { background: var(--gold); box-shadow: 0 0 0 3px rgba(217, 164, 65, 0.25); }
+.rounds span { margin-left: 6px; font-variant-numeric: tabular-nums; }
+.stepbar { display: flex; align-items: center; gap: 6px; }
+.steps { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; font-size: 12.5px; }
+.steps li { display: flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 999px; color: var(--text-dim); }
+.steps li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #3b2a2d; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14); }
+.steps li.done::before { background: var(--gold-deep); }
+.steps li.on { color: var(--gold-soft); font-weight: 700; background: rgba(217, 164, 65, 0.14); }
+.steps li.on::before { background: var(--gold); box-shadow: 0 0 8px 2px rgba(217, 164, 65, 0.8); }
+.tools { margin-left: auto; display: flex; gap: 6px; }
+.ibtn {
+  width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  border-radius: 10px; border: 1px solid var(--line); background: transparent; color: var(--gold-soft); padding: 0;
+}
+.ibtn:hover { border-color: var(--gold); }
+.ibtn svg { width: 18px; height: 18px; }
+.ibtn.sm { width: 24px; height: 24px; border-radius: 50%; font-size: 13px; font-weight: 700; }
+.ibtn .cross { display: none; }
+.ibtn.muted { color: var(--text-dim); }
+.ibtn.muted .wave { display: none; }
+.ibtn.muted .cross { display: inline; }
+.tbtn { height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: transparent; color: var(--gold-soft); font-size: 13px; white-space: nowrap; }
+.tbtn:hover { border-color: var(--gold); }
+#btn-pause .i-play { display: none; }
+#btn-pause.paused { background: var(--gold); border-color: var(--gold); color: var(--lacquer); }
+#btn-pause.paused .i-pause { display: none; }
+#btn-pause.paused .i-play { display: inline; }
+
+/* ---------- table: a seat in each corner, the piles in the middle, the dock between the bottom seats ---------- */
+.table {
+  flex: 1; display: grid; gap: 12px; min-height: 0;
+  grid-template-columns: minmax(210px, 1fr) minmax(0, 2.3fr) minmax(210px, 1fr);
+  grid-template-rows: auto minmax(250px, 1fr) auto;
+  grid-template-areas: "tl tc tr" "c c c" "bl dk br";
+}
+#players { display: contents; }
+.seat.at-tl { grid-area: tl; align-self: start; }
+.seat.at-tr { grid-area: tr; align-self: start; }
+.seat.at-tc { grid-area: tc; align-self: start; justify-self: center; width: min(290px, 100%); }
+.seat.at-bl { grid-area: bl; align-self: end; }
+.seat.at-br { grid-area: br; align-self: end; }
+@media (max-width: 760px) {
+  .table { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: none; grid-template-areas: "tl tr" "tc tc" "c c" "bl br" "dk dk"; }
+  .seat.at-tc { width: auto; justify-self: stretch; }
+}
+
+/* ---------- seats ---------- */
+.seat {
+  position: relative; background: var(--lacquer-2); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px;
+  display: grid; gap: 6px; align-content: start; min-width: 0; transition: opacity 0.25s, border-color 0.25s, box-shadow 0.25s;
+}
+.table.focus .seat:not(.active):not(.acting) { opacity: 0.62; }
+.seat.active { border-color: var(--pc); box-shadow: 0 0 0 1px var(--pc), 0 0 30px -6px var(--pc); }
+.seat.acting { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+.seat .hd { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.avatar {
+  position: relative; width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.5), transparent 55%), var(--pc);
+  color: var(--lacquer); font-family: var(--font-display); font-weight: 900; font-size: 20px;
+  box-shadow: 0 0 0 3px var(--lacquer-2), 0 0 0 4px var(--pc); transition: transform 0.3s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+.seat.active .avatar { transform: scale(1.28); animation: seatpulse 1.5s ease-in-out infinite; }
+@keyframes seatpulse {
+  0%, 100% { box-shadow: 0 0 0 3px var(--lacquer-2), 0 0 0 4px var(--pc), 0 0 8px 2px var(--pc); }
+  50% { box-shadow: 0 0 0 3px var(--lacquer-2), 0 0 0 4px var(--pc), 0 0 24px 8px var(--pc); }
+}
+.startmark {
+  position: absolute; right: -7px; bottom: -5px; width: 19px; height: 19px; border-radius: 50%; background: var(--gold); color: var(--lacquer);
+  display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; font-family: var(--font-display); box-shadow: 0 0 0 2px var(--lacquer-2);
+}
+.seat .who2 { min-width: 0; display: grid; line-height: 1.3; }
+.seat .nm { font-weight: 700; display: flex; align-items: center; gap: 6px; min-width: 0; white-space: nowrap; }
+.seat .nmt { overflow: hidden; text-overflow: ellipsis; }
+.seat .rl { font-family: var(--font-display); color: var(--gold-soft); font-size: 12.5px; white-space: nowrap; }
+.seat .ai { font-size: 10.5px; color: var(--text-dim); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; font-weight: 400; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--pc); flex-shrink: 0; }
+.lamp { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; background: #3b2a2d; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14); }
+.seat.active .lamp { background: #6ff0a0; box-shadow: 0 0 8px 2px rgba(111, 240, 160, 0.7); }
+.seat.acting .lamp, .seat .lamp.think { background: #ffc85c; box-shadow: 0 0 8px 2px rgba(255, 200, 92, 0.7); }
+.seat .lamp.think { animation: blink 0.9s ease-in-out infinite; }
+.seat .lamp.ready { background: var(--gold); box-shadow: 0 0 6px 1px rgba(217, 164, 65, 0.7); animation: none; }
+@keyframes blink { 50% { opacity: 0.25; } }
+.seat .last { font-size: 12px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 19px; padding: 1px 6px; margin-inline: -6px; border-radius: 6px; }
+.seat .last.fresh { animation: lastflash 2.2s ease; }
+@keyframes lastflash { 0%, 35% { background: rgba(217, 164, 65, 0.3); color: var(--gold-soft); } 100% { background: transparent; } }
+.hand { display: inline-flex; gap: 2px; margin-left: auto; padding: 2px; align-self: flex-start; }
+.hand i { width: 9px; height: 13px; border-radius: 2px; background: var(--god); box-shadow: inset 0 0 0 1px rgba(241, 213, 154, 0.6); }
+.nums { display: flex; align-items: baseline; gap: 14px; }
+.nums .cash { font-family: var(--font-display); font-weight: 900; font-size: 20px; font-variant-numeric: tabular-nums; transform-origin: left center; }
+.nums .cash.up { animation: cashup 0.7s ease; }
+.nums .cash.down { animation: cashdown 0.7s ease; }
+.nums .joy { font-weight: 700; color: var(--fun); font-size: 16px; }
+@keyframes cashup { 30% { color: var(--pos); transform: scale(1.12); } }
+@keyframes cashdown { 30% { color: var(--neg); transform: scale(1.12); } }
+.front { display: flex; flex-wrap: wrap; align-items: flex-end; min-height: 56px; padding-left: 12px; row-gap: 6px; }
+.front .none { margin-left: -12px; font-size: 12px; color: var(--text-dim); align-self: center; }
+.score { display: flex; align-items: center; gap: 4px; font-size: 11.5px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.score span { padding: 0 6px; border-radius: 4px; background: var(--shade); }
+.score span.short { color: var(--neg); box-shadow: inset 0 0 0 1px var(--neg); }
+.score b { margin-left: auto; color: var(--gold-soft); font-size: 12.5px; }
+
+/* mini cards in front of a player */
+.mini {
+  position: relative; width: 40px; height: 56px; margin-left: -12px; flex-shrink: 0; border-radius: 5px; overflow: hidden;
+  background: var(--paper); color: var(--ink); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 9.5px; line-height: 1.15;
+  transition: transform 0.15s ease;
+}
+.mini::before { content: ""; display: block; width: 100%; height: 7px; background: var(--cc); margin-bottom: 3px; flex-shrink: 0; }
+.mini b { font-family: var(--font-display); font-weight: 900; padding: 0 2px; }
+.mini i { font-style: normal; color: var(--fun); font-size: 8.5px; margin-top: auto; margin-bottom: 3px; letter-spacing: -1px; }
+.mini:hover { transform: translateY(-8px) scale(1.06); z-index: 3; }
+.mini.mark { background: #efe7fb; outline: 1.5px dashed var(--god); outline-offset: -3px; }
+.mini.mark i { color: var(--god); font-weight: 700; letter-spacing: 0; font-size: 8px; }
+.mini.token { background: var(--cc); color: #fff; justify-content: center; }
+.mini.token::before { display: none; }
+.mini.token b { font-size: 12px; }
+.mini.token i { color: #fff; margin-top: 2px; font-size: 10px; letter-spacing: 0; }
+
+/* ---------- the middle of the table ---------- */
+.center {
+  grid-area: c; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 30px; flex-wrap: wrap;
+  background: radial-gradient(ellipse at 50% 45%, rgba(255, 255, 255, 0.05), transparent 65%), var(--shade);
+  border: 1px solid var(--line); border-radius: 22px; padding: 16px 18px;
+}
+.tableside { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; justify-content: center; }
+.slot .lbl, .stage .cap { font-size: 12px; color: var(--text-dim); letter-spacing: 0.08em; margin-bottom: 6px; }
+.piles { display: grid; grid-template-columns: repeat(3, 58px); gap: 14px 12px; }
+.pile { appearance: none; background: none; border: 0; padding: 0; font: inherit; font-size: 11px; color: var(--text-dim); text-align: center; cursor: default; }
+.pile .stack { position: relative; display: block; width: 54px; height: 76px; margin-inline: auto; border-radius: 7px; isolation: isolate; transition: transform 0.15s ease; }
+.pile .stack::before, .pile .stack::after { content: ""; position: absolute; inset: 0; border-radius: 7px; background: var(--cc); z-index: -1; }
+.pile .stack::before { transform: translate(3px, 3px); filter: brightness(0.55); }
+.pile .stack::after { transform: translate(6px, 6px); filter: brightness(0.4); }
+.pile .stack.mid::after, .pile .stack.thin::after, .pile .stack.thin::before, .pile .stack.none::before, .pile .stack.none::after { display: none; }
+.pile .stack.none { border: 1px dashed var(--line); }
+.pile .cnt { position: absolute; right: -8px; bottom: -8px; z-index: 2; min-width: 22px; padding: 0 5px; border-radius: 999px; background: var(--lacquer); border: 1px solid var(--line); color: var(--gold-soft); font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.pile .pl-l { display: block; margin-top: 10px; }
+.pile.pickable { cursor: pointer; color: var(--gold-soft); }
+.pile.pickable .stack { animation: pilepulse 1.3s ease-in-out infinite; }
+.pile.pickable:hover .stack, .pile.pickable:focus-visible .stack { transform: translateY(-4px); }
+@keyframes pilepulse { 0%, 100% { box-shadow: 0 0 0 2px var(--gold), 0 0 10px 2px rgba(217, 164, 65, 0.45); } 50% { box-shadow: 0 0 0 2px var(--gold), 0 0 24px 8px rgba(217, 164, 65, 0.8); } }
+.pile { transition: opacity 0.25s, filter 0.25s; }
+.pile.dim { opacity: 0.4; filter: saturate(0.55); }
+.pile.lit { color: var(--gold-soft); }
+.pile.lit .stack { box-shadow: 0 0 0 2px rgba(241, 213, 154, 0.75), 0 0 16px 3px rgba(241, 213, 154, 0.35); }
+.pile.pickable.dim { opacity: 1; filter: none; }
+.bankpile .coinstack {
+  width: 50px; height: 50px; margin-block: 13px; border-radius: 50%; isolation: auto;
+  background: radial-gradient(circle at 35% 30%, #fff1c0, #e0a93a 55%, #9c6814);
+  box-shadow: 0 3px 0 #7a4f0e, 0 6px 0 #5e3c0a, 0 9px 16px rgba(0, 0, 0, 0.4);
+  display: flex; align-items: center; justify-content: center; color: #6b420b; font-family: var(--font-display); font-weight: 900; font-size: 20px;
+}
+.bankpile .coinstack::before, .bankpile .coinstack::after { display: none; }
+.stage { min-height: 214px; display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; min-width: 0; }
+.stage .empty-note { color: var(--text-dim); font-size: 14px; align-self: center; }
+.stagecards { display: flex; gap: 14px; flex-wrap: wrap; }
+.auc { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; min-width: 0; }
+.bidlist { display: grid; gap: 6px; min-width: 190px; flex: 1; }
+.bidrow { display: flex; align-items: center; gap: 8px; background: var(--lacquer-2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; }
+.bidrow .bn { font-weight: 700; }
+.bidrow .bv { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--text-dim); }
+.bidrow.shown .bv { color: var(--text); font-weight: 700; font-family: var(--font-display); font-size: 17px; }
+.bidrow.shown { animation: reveal 0.35s ease; }
+.tg { font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 4px; }
+.tg.win { background: var(--gold); color: var(--lacquer); }
+.tg.sec { background: var(--high); color: #fff; }
+@keyframes reveal { from { transform: perspective(500px) rotateX(70deg); opacity: 0.3; } to { transform: none; opacity: 1; } }
+
+/* ---------- cards ---------- */
+.card {
+  position: relative; width: 140px; min-height: 196px; background: var(--paper); color: var(--ink); border-radius: 10px; overflow: hidden;
+  display: flex; flex-direction: column; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.38); flex-shrink: 0; container-type: inline-size;
+}
+.card::before { content: attr(data-mark); position: absolute; left: 0; right: 0; bottom: 3%; text-align: center; font-family: var(--font-display); font-weight: 900; font-size: 62cqw; line-height: 1; color: var(--cc); opacity: 0.09; pointer-events: none; }
+.card::after { content: ""; position: absolute; inset: 30px 6px 6px; border: 1px solid var(--cc); border-radius: 6px; opacity: 0.3; pointer-events: none; }
+.card .band { position: relative; z-index: 1; background: var(--cc); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-align: center; padding: 5px 4px; }
+.card .body { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 10px 11px; gap: 6px; }
+.card .ttl { font-family: var(--font-display); font-weight: 900; font-size: 19px; line-height: 1.25; }
+.card .amt { font-weight: 700; font-size: 20px; font-variant-numeric: tabular-nums; }
+.card .pos { color: var(--pos-ink); }
+.card .neg { color: var(--neg-ink); }
+.card .joy { color: var(--fun); font-size: 17px; letter-spacing: 1px; }
+.card .min { font-size: 13px; font-weight: 700; color: var(--ink-dim); }
+.card .fam { font-size: 11px; color: var(--ink-dim); letter-spacing: 0.2em; }
+.card .fx { font-size: 12px; line-height: 1.5; color: var(--ink-dim); }
+.card .sheen { position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0; transition: opacity 0.2s; background: radial-gradient(circle at var(--mx, 50%) var(--my, 0%), rgba(255, 255, 255, 0.65), transparent 55%); mix-blend-mode: soft-light; }
+.card.sm { width: 104px; min-height: 146px; border-radius: 8px; }
+.card.sm::after { inset: 26px 5px 5px; }
+.card.sm .ttl { font-size: 15px; }
+.card.sm .amt { font-size: 15px; }
+.card.sm .joy { font-size: 14px; }
+.card.sm .fx { font-size: 11px; }
+.card.sm .band { font-size: 10px; padding: 4px; }
+.card.ghost { background: transparent; border: 1px dashed var(--line); box-shadow: none; }
+.card.ghost::before, .card.ghost::after, .card.slot-ph::before, .card.slot-ph::after, .card.back-card::before, .card.back-card::after { display: none; }
+.card.ghost .fx { color: var(--text-dim); }
+.card.slot-ph { background: transparent; box-shadow: none; outline: 1px dashed var(--line); }
+.card.back-card { background: none; }
+.card.flip { animation: flip 0.45s ease; }
+.card.glow { animation: godglow 1.6s ease-in-out infinite; }
+.tilt { transition: transform 0.18s ease, box-shadow 0.18s ease; }
+.tilt:hover { transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-4px); box-shadow: 0 16px 30px rgba(0, 0, 0, 0.45); }
+.tilt:hover .sheen { opacity: 1; }
+@keyframes flip { from { transform: perspective(600px) rotateY(80deg); opacity: 0.3; } to { transform: none; opacity: 1; } }
+@keyframes godglow { 0%, 100% { box-shadow: 0 0 0 2px var(--god), 0 0 16px 2px rgba(110, 86, 166, 0.6); } 50% { box-shadow: 0 0 0 2px #b9a3ec, 0 0 30px 8px rgba(150, 120, 220, 0.75); } }
+/* card backs */
+.cback {
+  position: absolute; inset: 0; border-radius: inherit; background-color: var(--cc); container-type: inline-size;
+  background-image: radial-gradient(rgba(241, 213, 154, 0.18) 1.2px, transparent 1.7px), radial-gradient(rgba(241, 213, 154, 0.1) 1.2px, transparent 1.7px);
+  background-size: 12px 12px; background-position: 0 0, 6px 6px;
+  box-shadow: inset 0 0 0 3px var(--cc), inset 0 0 0 4.5px rgba(241, 213, 154, 0.75);
+  display: flex; align-items: center; justify-content: center;
+}
+.cback .seal { width: 54%; aspect-ratio: 1; border-radius: 50%; border: 2px solid rgba(241, 213, 154, 0.85); background: rgba(0, 0, 0, 0.2); color: #f8dc97; font-family: var(--font-display); font-weight: 900; font-size: 30cqw; line-height: 1; display: flex; align-items: center; justify-content: center; }
+
+/* ---------- decision dock ---------- */
+.dock {
+  grid-area: dk; align-self: end; min-width: 0;
+  position: sticky; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 20;
+  background: var(--lacquer-3); border: 1px solid var(--gold); border-radius: 14px; padding: 12px 16px 14px;
+  display: grid; gap: 8px; box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.45); max-height: 60vh; overflow: auto;
+}
+.dock-top { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-dim); min-height: 24px; }
+.dock-top .who { display: inline-flex; align-items: center; gap: 7px; }
+.dock-top .cash { color: var(--gold-soft); font-weight: 700; font-variant-numeric: tabular-nums; }
+.dock-top .helpbtn { margin-left: auto; }
+.dock h3 { font-size: 19px; color: var(--gold-soft); line-height: 1.3; }
+.dock .body { font-size: 14px; }
+.dock .body ul.lines { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: 13px; color: var(--text-dim); }
+.dock .acards { display: none; gap: 8px; flex-wrap: wrap; }
+@media (max-width: 700px) { .dock .acards { display: flex; } }
+.picks { display: flex; gap: 10px; flex-wrap: wrap; }
+.cardpick { appearance: none; background: none; border: 0; padding: 0; font: inherit; color: inherit; display: grid; justify-items: center; gap: 4px; cursor: pointer; }
+.cardpick:disabled { cursor: default; }
+.cardpick:disabled .card:not(.back-card) { filter: grayscale(0.6) brightness(0.82); }
+.cardpick:not(:disabled) .card { box-shadow: 0 0 0 2px var(--gold), 0 8px 20px rgba(0, 0, 0, 0.4); }
+.cardpick .cp-note { font-size: 11.5px; color: var(--gold-soft); }
+.cardpick:disabled .cp-note { color: var(--text-dim); }
+.opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.opt { padding: 9px 16px; border-radius: 10px; border: 1px solid var(--gold); background: var(--gold); color: var(--lacquer); font-weight: 700; line-height: 1.3; }
+.opt small { display: block; font-weight: 400; font-size: 12px; opacity: 0.85; margin-top: 2px; }
+.opt.ghost { background: transparent; color: var(--gold-soft); border-color: var(--line); }
+.opt.ghost:hover:not(:disabled) { border-color: var(--gold); }
+.opt:hover:not(:disabled) { filter: brightness(1.06); }
+.opt:disabled { opacity: 0.4; cursor: not-allowed; }
+.helpbox { font-size: 13px; line-height: 1.65; background: rgba(0, 0, 0, 0.2); border-radius: 10px; padding: 10px 12px; }
+.helpbox p { margin: 0 0 6px; }
+.helpbox dl { margin: 0; display: grid; gap: 2px; }
+.helpbox dt { font-weight: 700; color: var(--gold-soft); }
+.helpbox dd { margin: 0 0 6px; color: var(--text-dim); }
+
+/* ---------- toasts ---------- */
+#toasts { position: fixed; top: calc(10px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); width: min(440px, calc(100% - 32px)); display: grid; gap: 8px; z-index: 55; pointer-events: none; }
+.toast {
+  pointer-events: auto; display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; line-height: 1.55;
+  background: rgba(38, 9, 13, 0.96); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5); animation: toastin 0.28s ease both;
+}
+.toast .t-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--tc, var(--gold)); margin-top: 7px; flex-shrink: 0; }
+.toast.good { --tc: var(--pos); }
+.toast.bad { --tc: var(--neg); }
+.toast.tip { --tc: var(--tip); }
+.toast .t-title { display: block; color: var(--gold-soft); font-size: 13px; }
+.toast .t-body { min-width: 0; }
+.toast .t-x { margin-left: auto; background: none; border: 0; color: var(--text-dim); font-size: 17px; line-height: 1; padding: 2px 4px; }
+.toast.out { animation: toastout 0.25s ease forwards; }
+@keyframes toastin { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+@keyframes toastout { to { opacity: 0; transform: translateY(-8px); } }
+
+/* ---------- log drawer ---------- */
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(360px, 88vw); z-index: 48; display: flex; flex-direction: column;
+  background: var(--lacquer-2); border-left: 1px solid var(--line); box-shadow: -20px 0 40px rgba(0, 0, 0, 0.5);
+  padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 14px;
+}
+.drawer-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.drawer-hd h4 { font-size: 16px; color: var(--gold-soft); }
+.drawer-hd .ibtn { margin-left: auto; }
+.log { list-style: none; margin: 0; padding: 0; overflow: auto; font-size: 13px; display: grid; gap: 5px; align-content: start; flex: 1; }
+.log li { display: flex; gap: 8px; }
+.log .r { color: var(--gold); font-variant-numeric: tabular-nums; font-size: 11px; padding-top: 2px; flex-shrink: 0; }
+
+/* ---------- motion layer ---------- */
+#fx { position: fixed; inset: 0; pointer-events: none; z-index: 45; }
+.fly { position: fixed; perspective: 900px; }
+.fly-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; }
+.fly .face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 10px; }
+.fly .face.front { transform: rotateY(180deg); }
+.fly .face.solo { backface-visibility: visible; }
+.fly .face .card, .fly .face .mini { width: 100%; height: 100%; min-height: 0; margin: 0; }
+.fly .face > .cback { border-radius: 10px; box-shadow: inset 0 0 0 3px var(--cc), inset 0 0 0 4.5px rgba(241, 213, 154, 0.75), 0 10px 24px rgba(0, 0, 0, 0.45); }
+.floaty { position: fixed; transform: translate(-50%, -50%); font-family: var(--font-display); font-weight: 900; font-size: 21px; color: var(--gold-soft); text-shadow: 0 2px 0 rgba(0, 0, 0, 0.55), 0 0 12px rgba(0, 0, 0, 0.6); white-space: nowrap; }
+.floaty.pos { color: var(--pos); }
+.floaty.neg { color: var(--neg); }
+.floaty.joy { color: #ffb8a3; }
+.floaty.low { color: #b9c6da; }
+.coin { position: fixed; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff3c4, #e0a93a 55%, #a8711a); box-shadow: 0 0 6px rgba(255, 210, 120, 0.8); }
+.banner { position: fixed; left: 50%; top: 40%; transform: translate(-50%, -50%); text-align: center; padding: 16px 40px; background: rgba(40, 8, 12, 0.9); border: 1px solid var(--gold); border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6); }
+.banner b { display: block; font-family: var(--font-display); font-weight: 900; font-size: 42px; color: var(--gold-soft); letter-spacing: 0.15em; line-height: 1.2; }
+.banner span { color: var(--text-dim); font-size: 14px; letter-spacing: 0.3em; }
+.token { position: fixed; transform: translate(-50%, -50%); width: 22px; height: 22px; border-radius: 50%; background: var(--gold); color: var(--lacquer); font-family: var(--font-display); font-weight: 900; font-size: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); }
+.ring { position: fixed; border-radius: 14px; border: 3px solid var(--gold-soft); box-shadow: 0 0 24px 6px rgba(241, 213, 154, 0.6), inset 0 0 18px rgba(241, 213, 154, 0.5); }
+canvas.confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 70; }
+#peek { position: fixed; z-index: 60; pointer-events: none; transform: translate(-50%, calc(-100% - 10px)); }
+#peek.below { transform: translate(-50%, 10px); }
+#peek .card { width: 150px; }
+
+/* ---------- overlays ---------- */
+.ov { position: fixed; inset: 0; z-index: 50; background: rgba(24, 5, 8, 0.86); backdrop-filter: blur(3px); overflow: auto; padding: 28px 16px; display: flex; }
+.ov.solid { background: var(--lacquer); backdrop-filter: none; }
+.sheet { background: var(--lacquer-2); border: 1px solid var(--line); border-radius: 16px; width: min(760px, 100%); padding: 24px; margin: auto; display: grid; gap: 16px; }
+.sheet.wide { width: min(920px, 100%); }
+.sheet h2 { font-size: 25px; color: var(--gold-soft); }
+.sheet p { margin: 0; }
+.row-btns { display: flex; flex-wrap: wrap; gap: 10px; }
+.row-btns .opt { text-align: center; min-width: 140px; }
+
+.title-sheet { text-align: center; justify-items: center; }
+.title-sheet .eyebrow { font-size: 12px; letter-spacing: 0.45em; color: var(--gold); font-weight: 700; }
+.title-sheet h1 { font-size: clamp(48px, 11vw, 88px); font-weight: 900; color: var(--gold-soft); letter-spacing: 0.14em; line-height: 1.05; text-shadow: 0 4px 0 rgba(0, 0, 0, 0.3); }
+.gods { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.gods div { border: 1px solid var(--line); border-radius: 10px; padding: 8px 16px; font-family: var(--font-display); }
+.gods b { display: block; color: var(--gold); letter-spacing: 0.3em; font-size: 17px; }
+.story { text-align: left; font-family: var(--font-display); font-weight: 700; font-size: 15.5px; line-height: 1.95; color: var(--text); max-width: 36em; display: grid; gap: 10px; }
+.story .q { text-align: center; color: var(--gold-soft); font-size: 17px; }
+.meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 22px; font-size: 13px; color: var(--text-dim); }
+.meta b { color: var(--gold-soft); font-family: var(--font-display); font-size: 17px; margin-right: 4px; }
+
+fieldset.field { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px 14px; margin: 0; display: grid; gap: 10px; min-width: 0; }
+fieldset.field legend { padding: 0 6px; color: var(--gold-soft); font-family: var(--font-display); font-weight: 700; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; flex-wrap: wrap; }
+.seg button { background: transparent; border: 0; padding: 7px 16px; color: var(--text-dim); }
+.seg button.on { background: var(--gold); color: var(--lacquer); font-weight: 700; }
+.seg.sm button { padding: 5px 12px; font-size: 13px; }
+.seatrows { display: grid; gap: 8px; }
+.seatrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.seatrow input { flex: 1; min-width: 120px; background: var(--shade); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; color: var(--text); font: inherit; }
+.chk { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; }
+.chk input { margin-top: 4px; accent-color: var(--gold); }
+.optrow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 14px; }
+
+.roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.rolecard { background: var(--paper); color: var(--ink); border-radius: 12px; padding: 12px 14px; display: grid; gap: 6px; align-content: start; border-top: 6px solid var(--pc); animation: dealin 0.55s cubic-bezier(0.2, 0.8, 0.3, 1.1) both; animation-delay: calc(var(--k, 0) * 130ms); }
+.rolecard .who { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--ink-dim); }
+.rolecard .rname { font-family: var(--font-display); font-weight: 900; font-size: 26px; color: var(--auction); }
+.rolecard dl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 0; text-align: center; }
+.rolecard dt { font-size: 11px; color: var(--ink-dim); }
+.rolecard dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.rolecard p { margin: 0; font-size: 13px; color: var(--ink-dim); }
+.rolecard .hint { color: var(--auction); font-weight: 700; }
+@keyframes dealin { from { transform: translateY(-30px) rotate(-6deg) scale(0.9); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.bidsheet { width: min(640px, 100%); }
+.bidsheet .who { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--text-dim); }
+.bidgrid { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+.bidctl { flex: 1; min-width: 240px; display: grid; gap: 12px; }
+.bidctl .k { font-size: 12px; color: var(--text-dim); letter-spacing: 0.1em; margin-bottom: 4px; }
+.bigmoney { font-family: var(--font-display); font-weight: 900; font-size: 28px; color: var(--gold-soft); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.bills { display: flex; gap: 8px; flex-wrap: wrap; }
+.bill {
+  appearance: none; border: 0; position: relative; width: 78px; height: 42px; border-radius: 6px; cursor: pointer;
+  background: linear-gradient(135deg, #f3e2b0, #d9b465); color: #5a3d0c; font-family: var(--font-display); font-weight: 900; font-size: 15px;
+  box-shadow: inset 0 0 0 2px rgba(90, 61, 12, 0.35), 0 3px 0 rgba(0, 0, 0, 0.35); transition: transform 0.12s ease;
+}
+.bill::after { content: "$"; position: absolute; left: 6px; top: 3px; font-size: 10px; opacity: 0.6; }
+.bill.b1000 { background: linear-gradient(135deg, #d8ecd0, #8fbf7c); color: #1f4a14; }
+.bill.b5000 { background: linear-gradient(135deg, #f0c9b8, #d98d6e); color: #5a1d0c; }
+.bill:disabled { opacity: 0.35; cursor: not-allowed; }
+.bill:not(:disabled):hover { transform: translateY(-2px); }
+.fist { min-height: 62px; display: flex; flex-wrap: wrap; align-items: center; padding: 8px 10px 8px 24px; border-radius: 10px; border: 1px dashed var(--line); background: var(--shade); row-gap: 6px; }
+.fist .bill { width: 62px; height: 34px; font-size: 13px; margin-left: -14px; }
+.fist .bill.new { animation: billin 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2); }
+.fist .empty { color: var(--text-dim); font-size: 13px; margin-left: -12px; }
+@keyframes billin { from { transform: translateY(-30px) rotate(-8deg); opacity: 0; } to { transform: none; opacity: 1; } }
+.bidnum { display: block; font-family: var(--font-display); font-weight: 900; font-size: 30px; line-height: 1.2; color: var(--text); font-variant-numeric: tabular-nums; margin-top: 6px; }
+.quick { display: flex; gap: 6px; flex-wrap: wrap; }
+.quick button { background: var(--shade); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 13.5px; }
+.quick button:hover { border-color: var(--gold); }
+.hint { font-size: 13px; color: var(--text-dim); }
+.handoff { text-align: center; justify-items: center; width: min(520px, 100%); }
+.bigdot { width: 54px; height: 54px; border-radius: 50%; background: var(--pc); box-shadow: 0 0 40px var(--pc); }
+
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tabs button { background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 5px 14px; color: var(--text-dim); font-size: 14px; }
+.tabs button.on { background: var(--gold); color: var(--lacquer); border-color: var(--gold); font-weight: 700; }
+.rules-sec { display: grid; gap: 12px; font-size: 14.5px; }
+.rules-sec h3 { font-size: 19px; color: var(--gold-soft); }
+.rules-sec ol, .rules-sec ul { margin: 0; padding-left: 22px; display: grid; gap: 4px; }
+.tblwrap { overflow-x: auto; }
+.rtbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+.rtbl th { text-align: left; font-weight: 700; color: var(--gold-soft); background: var(--lacquer-3); padding: 6px 10px; white-space: nowrap; }
+.rtbl td { padding: 6px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.rtbl .r { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rtbl .nm { font-weight: 700; white-space: nowrap; }
+.rtbl .pos { color: var(--pos); font-weight: 700; }
+.rtbl .neg { color: var(--neg); font-weight: 700; }
+.rtbl .joy { color: var(--fun); }
+.rtbl tr.win td { background: rgba(217, 164, 65, 0.14); }
+.formula { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+.formula div { flex: 1; min-width: 150px; background: var(--shade); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13.5px; }
+.formula b { display: block; font-family: var(--font-display); font-size: 16px; color: var(--gold-soft); }
+
+.winner { text-align: center; display: grid; gap: 6px; }
+.winner .k { font-size: 12px; letter-spacing: 0.3em; color: var(--gold); font-weight: 700; }
+.winner h2 { font-size: 34px; }
+.dicerow { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
+.dicecell { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--text-dim); }
+.dicecell b { color: var(--gold-soft); font-size: 15px; }
+.epi { background: var(--shade); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-family: var(--font-display); font-weight: 700; line-height: 1.9; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card.flip, .card.glow, .bidrow.shown, .pile.pickable .stack, .fist .bill.new, .rolecard, .toast, .nums .cash.up, .nums .cash.down, .seat.active .avatar, .seat .lamp.think, .seat .last.fresh { animation: none; }
+  .tilt:hover, .mini:hover, .pile.pickable:hover .stack, .seat.active .avatar { transform: none; }
+}
+</style>
+
+<div class="wrap" id="app">
+  <header class="topbar">
+    <div class="brand">快樂有價</div>
+    <div class="rounds" id="round"></div>
+    <div class="stepbar">
+      <ol class="steps" id="steps" aria-label="回合步驟"></ol>
+      <button class="ibtn sm" id="btn-step" type="button" title="這一步在做什麼" aria-label="這一步在做什麼">?</button>
+    </div>
+    <div class="tools">
+      <button class="tbtn" id="btn-speed" type="button" title="電腦玩家的節奏，按一下切換">節奏 普通</button>
+      <button class="ibtn" id="btn-pause" type="button" title="暫停" aria-label="暫停" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path class="i-pause" d="M9 6v12M15 6v12"/><path class="i-play" d="M8 5.5v13l10.5-6.5z"/></svg></button>
+      <button class="ibtn" id="btn-rules" type="button" title="規則" aria-label="規則"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19"/><path d="M9 7.5h6"/></svg></button>
+      <button class="ibtn" id="btn-log" type="button" title="遊戲紀錄" aria-label="遊戲紀錄" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01" stroke-width="2.6"/></svg></button>
+      <button class="ibtn" id="btn-music" type="button" title="背景音樂" aria-label="背景音樂" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17.5V5.5l10-2v12"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/><path class="cross" d="M3 3l18 18"/></svg></button>
+      <button class="ibtn" id="btn-sound" type="button" title="音效" aria-label="音效" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path class="wave" d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11"/><path class="cross" d="M16 9.5l5 5M21 9.5l-5 5"/></svg></button>
+      <button class="ibtn" id="btn-new" type="button" title="新遊戲" aria-label="新遊戲"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4.5V9h4.5"/></svg></button>
+    </div>
+  </header>
+
+  <main class="table" id="table">
+    <div id="players" aria-label="玩家"></div>
+    <section class="center" id="board" aria-label="桌面"></section>
+    <section class="dock" id="action" aria-live="polite">
+      <h3>歡迎來到天庭賭局</h3>
+      <div class="body">按「開始遊戲」設定玩家。</div>
+    </section>
+  </main>
+</div>
+
+<aside class="drawer" id="drawer" hidden aria-label="遊戲紀錄">
+  <div class="drawer-hd"><h4>遊戲紀錄</h4><button class="ibtn sm" id="drawer-close" type="button" aria-label="關閉紀錄">×</button></div>
+  <ul class="log" id="log"></ul>
+</aside>
+<div id="toasts" aria-live="polite"></div>
+<div id="fx" aria-hidden="true"></div>
+<div id="peek" hidden></div>
+
+<!-- title -->
+<div class="ov" id="ov-title">
+  <div class="sheet title-sheet">
+    <div class="eyebrow">天庭賭局 · 人間拍賣會</div>
+    <h1>快樂有價</h1>
+    <div class="gods">
+      <div><b>財神</b>有錢，就會快樂</div>
+      <div><b>喜神</b>快樂，錢買不到</div>
+    </div>
+    <div class="story">
+      <p>天庭裡的財神和喜神，已經吵了一千年。玉皇大帝聽煩了，要他們從人間挑五個凡人打賭：學生、醫生、上班族、房東和軍人。</p>
+      <p>接下來的一年，財神會丟給他們發財的機會，喜神會在他們面前擺滿誘惑。每到月底，天庭還會開一場拍賣會，把人間最搶手的房子、旅行和好運拿出來賣。</p>
+      <p class="q">這個人是被錢推著走，<br>還是懂得讓錢替自己換來快樂？</p>
+    </div>
+    <div class="meta"><span><b>4–5</b>人</span><span><b>15+</b>歲</span><span><b>20</b>分鐘</span><span><b>6</b>回合</span></div>
+    <div class="row-btns">
+      <button class="opt" id="title-start" type="button">開始遊戲</button>
+      <button class="opt ghost" id="title-rules" type="button">閱讀規則</button>
+    </div>
+    <p class="dim small">遊戲有背景音樂和音效，右上角可以隨時分別關閉。</p>
+  </div>
+</div>
+
+<!-- setup -->
+<div class="ov" id="ov-setup" hidden>
+  <form class="sheet" id="setup-form">
+    <h2>遊戲設定</h2>
+    <div id="setup-body" style="display:grid;gap:14px"></div>
+    <div class="row-btns">
+      <button class="opt" type="submit">抽身分牌</button>
+      <button class="opt ghost" type="button" id="setup-cancel">返回</button>
+    </div>
+  </form>
+</div>
+
+<!-- roles -->
+<div class="ov" id="ov-roles" hidden>
+  <div class="sheet wide">
+    <h2>被選中的凡人</h2>
+    <p class="dim">結算時，開心值每 1 點換成 1,000 元，和錢加在一起，總分最高的人獲勝。</p>
+    <div class="roles" id="roles-body"></div>
+    <p class="dim small" id="roles-start-note"></p>
+    <div class="row-btns"><button class="opt" id="roles-go" type="button">開始第 1 回合</button></div>
+  </div>
+</div>
+
+<!-- bid / handoff -->
+<div class="ov solid" id="ov-bid" hidden></div>
+
+<!-- end -->
+<div class="ov" id="ov-end" hidden>
+  <div class="sheet wide" id="end-body"></div>
+</div>
+
+<!-- rules -->
+<div class="ov" id="ov-rules" hidden>
+  <div class="sheet wide">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <h2>遊戲規則</h2>
+      <button class="ibtn sm" id="rules-close" type="button" style="margin-left:auto" aria-label="關閉規則">×</button>
+    </div>
+    <div class="tabs" id="rules-tabs"></div>
+    <div id="rules-body"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ================= data ================= */
+const ROLES = [
+  { id: 'student', name: '學生', cash: 6000, joy: 10, income: 2500, desc: '靠打工賺生活費。錢包很薄，但一杯手搖飲就能開心一整天。' },
+  { id: 'doctor', name: '醫生', cash: 10000, joy: 2, income: 3500, desc: '收入最高，卻已經忙到記不起上次放假是什麼時候。' },
+  { id: 'office', name: '上班族', cash: 10000, joy: 6, income: 2500, desc: '每天擠捷運上下班。收入和心情都普普通通，接下來全看自己怎麼拚。' },
+  { id: 'landlord', name: '房東', cash: 8000, joy: 4, income: 1500, desc: '開局就擁有一張人間套房拍賣牌，每回合除了收入，還能多收 1,000 租金。' },
+  { id: 'soldier', name: '軍人', cash: 9000, joy: 7, income: 2500, desc: '作息規律、薪水穩定，心態也跟著穩定。' },
+];
+const FUN_DEF = [
+  ['吃東西', 1, 500, 2], ['看漫畫', 1, 500, 2], ['手搖飲', 1, 500, 1], ['看電影', 2, 1000, 2], ['唱歌', 2, 1000, 1],
+  ['按摩', 2, 1500, 1], ['泡溫泉', 2, 1500, 1], ['逛街', 2, 2000, 1], ['小狗', 3, 5000, 1, true], ['小貓', 3, 5000, 1, true],
+  ['出國旅遊', 4, 6000, 1],
+];
+const CHANCE_NAMES = ['財神托夢', '算命仙指點', '朋友報明牌', '理專來電', '財經新聞', '網紅推薦', '土地公顯靈', '爸媽的叮嚀', '年終分紅', '天降良機'];
+const GOD_DEF = [
+  { god: 'bless', name: '財神眷顧', family: '財神', n: 1, target: 'self', text: '放在自己面前。你下一次投資翻到的金額 +2,000，用完棄掉。' },
+  { god: 'frown', name: '財神翻臉', family: '財神', n: 2, target: 'other', text: '指定一位玩家，放在他面前。他下一次投資翻到的金額 −2,000，用完棄掉。' },
+  { god: 'tax', name: '財神抽稅', family: '財神', n: 1, target: 'other', text: '指定一位玩家，他付 2,000 給銀行。' },
+  { god: 'sigh', name: '喜神嘆氣', family: '喜神', n: 2, target: 'other', text: '指定一位玩家，他拿 2 張低落牌。' },
+  { god: 'prank', name: '喜神惡作劇', family: '喜神', n: 1, target: 'other', text: '指定一位玩家，放在他面前。他下一次抽到娛樂牌時一定要享受，錢不夠就貸款，用完棄掉。' },
+  { god: 'grace', name: '喜神賜福', family: '喜神', n: 1, target: 'self', text: '你棄掉面前最多 2 張低落牌。' },
+  { god: 'raid', name: '天兵奪寶', family: '天兵', n: 1, target: 'asset', text: '選一位玩家面前的 1 張拍賣牌，付他「底價 ＋ 2,000」強制買下，他不能拒絕。' },
+  { god: 'amulet', name: '神明護身符', family: '天兵', n: 1, target: 'none', text: '別人對你打出神明卡時立刻打出，那張牌沒有效果。任何時候都能用。' },
+];
+const LOW_DEF = [['基金配息', 2000, 2], ['儲蓄險到期', 1500, 2], ['定期存款到期', 1000, 3], ['債券收息', 500, 2], ['銀行手續費', -500, 2], ['基金小跌', -1000, 1]];
+const HIGH_DEF = [['刮刮樂頭獎', 10000, 1], ['股票漲停', 6000, 2], ['房產增值', 5000, 2], ['創業成功', 4000, 1], ['刮刮樂槓龜', -1000, 1], ['股票被套', -2000, 2], ['房市泡沫', -4000, 1], ['創業失敗', -5000, 1], ['股票崩盤', -6000, 1]];
+const AUCTION_DEF = [
+  { id: 'suite', name: '人間套房', min: 3000, rent: 1000, value: 5000, n: 3, text: '發薪時多收 1,000 租金。結算時價值 5,000。' },
+  { id: 'shop', name: '黃金店面', min: 6000, rent: 2000, value: 8000, n: 1, text: '發薪時多收 2,000 租金。結算時價值 8,000。' },
+  { id: 'bowl', name: '聚寶盆', min: 3000, value: 6000, n: 1, text: '結算時價值 6,000。' },
+  { id: 'dice', name: '財神的骰子', min: 1000, dice: true, n: 1, text: '結算時翻 1 張高風險牌，價值 4,000 ＋ 牌上金額，最低 0。' },
+  { id: 'thread', name: '月老紅線', min: 4000, joy: 5, n: 1, text: '開心值 +5。' },
+  { id: 'trip', name: '環島旅行', min: 3000, joy: 4, n: 1, text: '開心值 +4。' },
+  { id: 'peach', name: '蟠桃宴門票', min: 2000, joy: 3, n: 1, text: '開心值 +3。' },
+  { id: 'insider', name: '內線消息', min: 1000, n: 1, text: '下一次投資時，從你選的牌堆翻 2 張，選 1 張執行，另一張放回牌堆底。用完棄掉。' },
+  { id: 'charm', name: '平安符', min: 1000, n: 1, text: '抵銷 1 張賠錢的投資牌，或 1 張對你打出的神明卡。用完棄掉。' },
+];
+const SKY_DEF = [
+  { id: 'wealthday', name: '財神壽誕', text: '翻到賺錢的高風險牌時，多拿 1,000。' },
+  { id: 'thunder', name: '雷公發威', text: '翻到賠錢的高風險牌時，多賠 1,000。' },
+  { id: 'redpacket', name: '天庭發紅包', text: '發薪時，每回合收入變成兩倍（租金不變）。' },
+  { id: 'rent', name: '土地公收租', text: '發薪時，人間套房和黃金店面的租金變成兩倍。' },
+  { id: 'joydown', name: '喜神下凡', text: '所有娛樂牌的花費少 500，最低 0 元。' },
+  { id: 'joyaway', name: '喜神閉關', text: '所有娛樂牌的花費多 500。' },
+  { id: 'matchmaker', name: '月老牽線', text: '發薪時，每人可以棄掉面前 1 張低落牌。' },
+  { id: 'peace', name: '天下太平', text: '沒有特別的事。' },
+];
+const TYPE = {
+  fun: ['娛樂', 'var(--fun)'], chance: ['投資機會', 'var(--chance)'], god: ['神明卡', 'var(--god)'],
+  low: ['低風險', 'var(--low)'], high: ['高風險', 'var(--high)'], auction: ['天庭拍賣', 'var(--auction)'], sky: ['天象', 'var(--sky)'],
+};
+const BACKS = { event: ['var(--auction)', '事'], low: ['var(--low)', '穩'], high: ['var(--high)', '險'], auction: ['var(--gold-deep)', '拍'], sky: ['var(--sky)', '天'], god: ['var(--god)', '神'] };
+const MARKS = { fun: '樂', chance: '機', low: '穩', high: '險', auction: '拍', sky: '天' };
+const FAMILY_MARK = { 財神: '財', 喜神: '喜', 天兵: '兵' };
+// Seats go around the table clockwise, starting bottom-left, so turn order reads naturally on screen.
+const SEAT_AREAS = { 2: ['bl', 'tr'], 3: ['bl', 'tl', 'tr'], 4: ['bl', 'tl', 'tr', 'br'], 5: ['bl', 'tl', 'tc', 'tr', 'br'] };
+const ROLE_GLYPH = { student: '學', doctor: '醫', office: '班', landlord: '房', soldier: '軍' };
+const STEPS = [['sky', '天象'], ['payday', '發薪'], ['turns', '行動'], ['auction', '拍賣'], ['roundEnd', '結束']];
+const GUIDE = {
+  sky: ['第 1 步：翻天象牌', '起始玩家翻開一張天象牌，效果只在這一回合有效。已經翻開的天象牌張數就是回合數，一共 6 回合。'],
+  payday: ['第 2 步：發薪日', '每人領身分牌上的「每回合收入」。面前有人間套房、黃金店面的人，再加收租金。'],
+  turns: ['第 3 步：輪流行動', '從起始玩家開始順時針。輪到你時可以先打出 1 張神明卡（抽到的那一回合不能用），然後一定要抽 1 張事件牌：娛樂、投資機會或神明卡。'],
+  auction: ['第 4 步：天庭拍賣會', '每人暗中出價，同時公開。出價最高、而且達到底價的人得標，付全額；出價第二高的人要付自己出價的一半（以 500 為單位捨去）。最高價平手，或沒人達到底價，就流標。'],
+  roundEnd: ['第 5 步：回合結束', '起始玩家牌交給左手邊的玩家。第 6 回合結束後進入結算。'],
+  end: ['結算', '總分 ＝ 現金 ＋ 拍賣牌價值 − 貸款 × 6,000 ＋ 開心值 × 1,000。開心值 ＝ 初始開心值 ＋ 面前的 ☺ − 低落牌，最低 0。總分最高的人獲勝。'],
+};
+const DEFAULT_NAMES = ['小美', '阿翔', '小芳', '阿德', '小安'];
+const JOY_VALUE = 1000; // 1 happiness point is worth 1,000 at the final count (about what fun cards charge per point)
+const SPEED = { slow: 2000, normal: 1300, fast: 650 };
+const SPEED_LABEL = { slow: '慢', normal: '普通', fast: '快' };
+const MARK_PIP = { bless: '+2,000', frown: '−2,000', prank: '必享受' };
+
+/* ================= helpers ================= */
+const $ = (s) => document.querySelector(s);
+const fmt = (n) => Math.abs(n).toLocaleString('en-US');
+const money = (n) => (n < 0 ? '−$' : '$') + fmt(n);
+const signed = (n) => (n > 0 ? '+' : n < 0 ? '−' : '') + fmt(n);
+const joyStr = (n) => '☺'.repeat(Math.max(0, n));
+const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const clean = (s) => String(s || '').replace(/[<>&"'`]/g, '').trim().slice(0, 8);
+const stripIds = (html) => html.replace(/\sid="[^"]*"/g, '');
+
+let CFG = loadCfg();
+let G = null;
+let RUN = 0;
+let pending = null;
+let UID = 0;
+let PICK = null;
+let ACTING = null; // the seat whose answer the dock is waiting for
+let PAUSED = false; // the pause button holds the computer players between steps
+class Abort extends Error {}
+
+function loadCfg() {
+  const d = { n: 4, seats: DEFAULT_NAMES.map((name, i) => ({ name, ai: i > 0 })), speed: 'normal', tips: true, openCash: false };
+  try {
+    const s = JSON.parse(localStorage.getItem('kyp-cfg') || 'null');
+    if (s && Array.isArray(s.seats) && s.seats.length === 5) return { ...d, ...s };
+  } catch (e) { /* storage unavailable */ }
+  return d;
+}
+function saveCfg() { try { localStorage.setItem('kyp-cfg', JSON.stringify(CFG)); } catch (e) { /* ignore */ } }
+
+/* ================= sound (synthesised with Web Audio, no files) ================= */
+const SFX = (() => {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  let ctx = null, master = null, noiseBuf = null;
+  let muted = false;
+  try { muted = localStorage.getItem('kyp-sound') === 'off'; } catch (e) { /* ignore */ }
+  function ensure() {
+    if (!AC) return null;
+    if (!ctx) {
+      try { ctx = new AC(); } catch (e) { return null; }
+      master = ctx.createGain();
+      master.gain.value = 0.5;
+      master.connect(ctx.destination);
+      noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+    return ctx;
+  }
+  function tone({ f = 440, f2 = 0, type = 'sine', t = 0, dur = 0.2, vol = 0.2, attack = 0.005 }) {
+    const t0 = ctx.currentTime + t;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f, t0);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f2, t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol, t0 + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(master);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+  }
+  function noise({ t = 0, dur = 0.1, vol = 0.2, type = 'bandpass', freq = 2000, freq2 = 0, q = 1 }) {
+    const t0 = ctx.currentTime + t;
+    const s = ctx.createBufferSource();
+    s.buffer = noiseBuf;
+    const fl = ctx.createBiquadFilter();
+    fl.type = type; fl.Q.value = q;
+    fl.frequency.setValueAtTime(freq, t0);
+    if (freq2) fl.frequency.exponentialRampToValueAtTime(freq2, t0 + dur);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(vol, t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    s.connect(fl); fl.connect(g); g.connect(master);
+    s.start(t0, Math.random() * 0.5); s.stop(t0 + dur + 0.02);
+  }
+  const lib = {
+    tick: () => tone({ f: 1500, dur: 0.03, vol: 0.08, type: 'square' }),
+    click: () => { tone({ f: 1100, f2: 700, dur: 0.07, vol: 0.22, type: 'triangle' }); noise({ dur: 0.03, freq: 3200, q: 1.2, vol: 0.14 }); },
+    flip: () => { noise({ dur: 0.08, freq: 2600, q: 0.9, vol: 0.3 }); tone({ f: 900, f2: 1400, t: 0.02, dur: 0.05, vol: 0.05, type: 'triangle' }); },
+    slide: () => noise({ dur: 0.2, freq: 700, freq2: 2600, q: 0.8, vol: 0.13 }),
+    coin: () => { tone({ f: 1568, dur: 0.12, vol: 0.13, type: 'triangle' }); tone({ f: 2093, t: 0.06, dur: 0.25, vol: 0.11, type: 'triangle' }); },
+    coins: () => { for (let k = 0; k < 5; k++) tone({ f: 1760 + (k % 2) * 330, t: k * 0.07, dur: 0.14, vol: 0.08, type: 'triangle' }); },
+    joy: () => [1047, 1319, 1568, 2093].forEach((f, k) => tone({ f, t: k * 0.06, dur: 0.3, vol: 0.09, type: 'triangle' })),
+    sad: () => { tone({ f: 392, f2: 330, dur: 0.22, vol: 0.1 }); tone({ f: 330, f2: 262, t: 0.18, dur: 0.4, vol: 0.1 }); },
+    lose: () => { tone({ f: 196, f2: 98, dur: 0.4, vol: 0.12, type: 'sawtooth' }); noise({ dur: 0.18, freq: 400, q: 0.7, vol: 0.1, type: 'lowpass' }); },
+    stamp: () => { tone({ f: 140, f2: 55, dur: 0.2, vol: 0.3 }); noise({ dur: 0.06, freq: 1200, q: 0.8, vol: 0.16 }); },
+    magic: () => { [784, 988, 1175, 1568, 1976].forEach((f, k) => tone({ f, t: k * 0.045, dur: 0.45, vol: 0.055 })); noise({ dur: 0.6, freq: 7000, q: 3, vol: 0.045 }); },
+    hit: () => { noise({ dur: 0.14, freq: 1400, q: 0.6, vol: 0.26 }); tone({ f: 160, f2: 60, dur: 0.22, vol: 0.26 }); },
+    block: () => { tone({ f: 1320, dur: 0.35, vol: 0.06, type: 'square' }); tone({ f: 1980, t: 0.01, dur: 0.5, vol: 0.05 }); noise({ dur: 0.3, freq: 5000, q: 4, vol: 0.05 }); },
+    gong: () => { [[110, 0.18], [221, 0.09], [331, 0.055], [442, 0.035], [663, 0.02]].forEach(([f, v]) => tone({ f, dur: 2.2, vol: v, attack: 0.01 })); noise({ dur: 0.08, freq: 600, q: 0.5, vol: 0.07 }); },
+    gavel: () => [0, 0.17].forEach((t) => { tone({ f: 420, f2: 300, t, dur: 0.1, vol: 0.24, type: 'triangle' }); noise({ t, dur: 0.05, freq: 1800, q: 1, vol: 0.16 }); }),
+    pop: () => tone({ f: 520, f2: 880, dur: 0.09, vol: 0.11 }),
+    fanfare: () => [[523, 0], [659, 0.13], [784, 0.26], [1047, 0.42], [784, 0.62], [1047, 0.76]].forEach(([f, t]) => { tone({ f, t, dur: 0.5, vol: 0.09, type: 'triangle' }); tone({ f: f / 2, t, dur: 0.5, vol: 0.05 }); }),
+    shuffle: () => { for (let k = 0; k < 7; k++) noise({ t: k * 0.045, dur: 0.04, freq: 2400 + k * 150, q: 1.2, vol: 0.11 }); },
+  };
+  return {
+    play(name) { if (muted || !lib[name]) return; if (!ensure()) return; try { lib[name](); } catch (e) { /* ignore audio errors */ } },
+    unlock() { if (!muted) ensure(); },
+    context() { return ensure(); },
+    get muted() { return muted; },
+    setMuted(v) { muted = !!v; try { localStorage.setItem('kyp-sound', muted ? 'off' : 'on'); } catch (e) { /* ignore */ } if (!muted) ensure(); },
+  };
+})();
+
+/* ================= background music (a looping pentatonic tune, synthesised) ================= */
+const BGM = (() => {
+  let on = true;
+  try { on = localStorage.getItem('kyp-music') !== 'off'; } catch (e) { /* ignore */ }
+  let ctx = null, bus = null, timer = 0, nextAt = 0, step = 0, phrase = 0, phraseCount = 0;
+  const BEAT = 60 / 84 / 2; // eighth notes at 84 bpm
+  const SCALE = [261.63, 293.66, 329.63, 392.0, 440.0]; // 宮 商 角 徵 羽 on C
+  const freq = (deg) => SCALE[((deg % 5) + 5) % 5] * Math.pow(2, Math.floor(deg / 5));
+  // Melody in scale degrees (5 = the C above middle C); -1 is a rest. Each phrase is one bar of eight eighths.
+  const PHRASES = [
+    [5, -1, 7, 8, 7, -1, 5, 4],
+    [4, 5, 7, -1, 8, 7, 5, -1],
+    [9, -1, 8, 7, 5, 7, 8, -1],
+    [7, 8, 9, -1, 8, 7, 5, -1],
+    [7, 5, 4, 2, 4, -1, 5, -1],
+  ];
+  const ROOTS = [0, 3, 4, 3, 0]; // bass degree under each phrase
+  function pluck(f, t, vol, dur) {
+    const o = ctx.createOscillator(), o2 = ctx.createOscillator();
+    const lp = ctx.createBiquadFilter(), g = ctx.createGain(), g2 = ctx.createGain();
+    o.type = 'triangle'; o.frequency.value = f;
+    o2.type = 'sine'; o2.frequency.value = f * 2; g2.gain.value = 0.3;
+    lp.type = 'lowpass'; lp.frequency.setValueAtTime(f * 6, t); lp.frequency.exponentialRampToValueAtTime(f * 1.5, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(lp); o2.connect(g2); g2.connect(lp); lp.connect(g); g.connect(bus);
+    o.start(t); o2.start(t); o.stop(t + dur + 0.05); o2.stop(t + dur + 0.05);
+  }
+  function pad(f, t, dur) {
+    [f, f * 1.5].forEach((x, k) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = x; o.detune.value = k ? 4 : -4;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.022, t + 0.9); g.gain.setValueAtTime(0.022, t + dur - 0.6); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(bus); o.start(t); o.stop(t + dur + 0.05);
+    });
+  }
+  function wood(t, vol) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(1100, t); o.frequency.exponentialRampToValueAtTime(700, t + 0.05);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
+    o.connect(g); g.connect(bus); o.start(t); o.stop(t + 0.1);
+  }
+  function nextPhrase() {
+    phraseCount++;
+    if (phraseCount % 4 === 0) return PHRASES.length - 1; // every fourth bar comes home
+    let k;
+    do { k = Math.floor(Math.random() * (PHRASES.length - 1)); } while (k === phrase);
+    return k;
+  }
+  function tick() {
+    while (nextAt < ctx.currentTime + 0.3) {
+      const s = step % 8;
+      if (s === 0) {
+        if (step > 0) phrase = nextPhrase();
+        pad(freq(ROOTS[phrase] - 5), nextAt, BEAT * 8 + 0.4);
+        wood(nextAt, 0.05);
+      }
+      const deg = PHRASES[phrase][s];
+      if (deg >= 0) pluck(freq(deg), nextAt, 0.07, 1.4);
+      if (s === 0 || s === 4) pluck(freq(ROOTS[phrase] - 5), nextAt, 0.06, 1.8);
+      if (s === 6 && Math.random() < 0.5) wood(nextAt, 0.03);
+      nextAt += BEAT;
+      step++;
+    }
+  }
+  function start() {
+    if (!on || timer) return;
+    ctx = SFX.context();
+    if (!ctx) return;
+    if (!bus) { bus = ctx.createGain(); bus.gain.value = 0; bus.connect(ctx.destination); }
+    bus.gain.cancelScheduledValues(ctx.currentTime);
+    bus.gain.setTargetAtTime(0.9, ctx.currentTime, 0.6);
+    nextAt = ctx.currentTime + 0.1;
+    timer = setInterval(tick, 60);
+  }
+  function stop() {
+    if (!timer) return;
+    clearInterval(timer); timer = 0;
+    if (bus && ctx) bus.gain.setTargetAtTime(0, ctx.currentTime, 0.3);
+  }
+  // A hidden tab throttles timers, which would make the tune stutter; pause it instead.
+  document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else if (on && ctx) start(); });
+  return {
+    start, stop,
+    get on() { return on; },
+    setOn(v) { on = !!v; try { localStorage.setItem('kyp-music', on ? 'on' : 'off'); } catch (e) { /* ignore */ } if (on) start(); else stop(); },
+  };
+})();
+
+/* ================= toasts ================= */
+function toast(html, { kind = 'info', title = '', ttl = 5200 } = {}) {
+  const box = $('#toasts');
+  if (!box) return;
+  const el = document.createElement('div');
+  el.className = `toast ${kind}`;
+  el.setAttribute('role', 'status');
+  el.innerHTML = `<span class="t-dot"></span><div class="t-body">${title ? `<b class="t-title">${title}</b>` : ''}${html}</div><button type="button" class="t-x" aria-label="關閉通知">×</button>`;
+  const close = () => { if (el.classList.contains('out')) return; el.classList.add('out'); setTimeout(() => el.remove(), 260); };
+  el.querySelector('.t-x').onclick = close;
+  box.prepend(el);
+  while (box.children.length > 3) box.lastElementChild.remove();
+  setTimeout(close, ttl);
+}
+// First-time explanations, shown once per game while the beginner hints are on.
+function tipOnce(key, html, title = '新手提示') {
+  if (!CFG.tips || G.seen[key]) return '';
+  G.seen[key] = true;
+  toast(html, { kind: 'tip', title, ttl: 9000 });
+  return '';
+}
+
+/* ================= motion ================= */
+const FX = {
+  motion() { return typeof document.body.animate === 'function' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches; },
+  k() { return { slow: 1.3, normal: 1.1, fast: 0.7 }[CFG.speed] || 1.1; },
+};
+const panelEl = (i) => document.querySelector(`.seat[data-i="${i}"]`);
+const cashEl = (p) => document.querySelector(`[data-cash="${p.i}"]`) || panelEl(p.i);
+const joyEl = (p) => document.querySelector(`[data-joy="${p.i}"]`) || panelEl(p.i);
+const frontEl = (p) => document.querySelector(`[data-front="${p.i}"]`) || panelEl(p.i);
+const handEl = (p) => document.querySelector(`[data-hand="${p.i}"]`) || panelEl(p.i);
+// Animations run inside the game loop; if a new game starts meanwhile, the old loop stops here.
+// A hidden tab pauses animations, so never wait longer than the animation was meant to take.
+async function fxWait(anim) {
+  const run = RUN;
+  let end = 1000;
+  try { end = anim.effect.getComputedTiming().endTime || end; } catch (e) { /* keep default */ }
+  try { await Promise.race([anim.finished, new Promise((r) => setTimeout(r, end + 250))]); } catch (e) { /* cancelled */ }
+  if (run !== RUN) throw new Abort();
+}
+function cardRect(r) {
+  if (r.height >= r.width * 1.2) return r;
+  const w = Math.min(44, r.width);
+  return { left: r.left + r.width / 2 - w / 2, top: r.top + r.height / 2 - w * 0.7, width: w, height: w * 1.4 };
+}
+const centerDelta = (a, b) => [a.left + a.width / 2 - (b.left + b.width / 2), a.top + a.height / 2 - (b.top + b.height / 2)];
+function makeFly(r, html) {
+  const el = document.createElement('div');
+  el.className = 'fly';
+  el.style.left = `${r.left}px`; el.style.top = `${r.top}px`; el.style.width = `${r.width}px`; el.style.height = `${r.height}px`;
+  el.innerHTML = html;
+  $('#fx').appendChild(el);
+  return el;
+}
+// Deal a card from a pile to a slot, then flip it face up.
+async function fxDraw(fromSel, toSel, face, { back = 'event', reveal = true } = {}) {
+  if (!FX.motion()) return;
+  const from = $(fromSel), to = $(toSel);
+  if (!from || !to) return;
+  const a = cardRect(from.getBoundingClientRect()), b = to.getBoundingClientRect();
+  if (!a.width || !b.width) return;
+  const faceHTML = face.back ? backHTML(face.back) : cardHTML(face);
+  const el = makeFly(b, `<div class="fly-inner"><div class="face back">${backHTML(back)}</div><div class="face front">${faceHTML}</div></div>`);
+  const k = FX.k();
+  const [dx, dy] = centerDelta(a, b);
+  let ok = false;
+  SFX.play('slide');
+  try {
+    await fxWait(el.animate([{ transform: `translate(${dx}px, ${dy}px) scale(${a.width / b.width})` }, { transform: 'translate(0, 0) scale(1)' }], { duration: 380 * k, easing: 'cubic-bezier(.2, .8, .25, 1)', fill: 'both' }));
+    if (reveal) {
+      SFX.play('flip');
+      await fxWait(el.firstElementChild.animate([{ transform: 'rotateY(0deg) scale(1)' }, { transform: 'rotateY(90deg) scale(1.07)', offset: 0.5 }, { transform: 'rotateY(180deg) scale(1)' }], { duration: 440 * k, easing: 'ease-in-out', fill: 'both' }));
+    }
+    ok = true;
+  } finally {
+    if (ok) { const rm = () => el.remove(); requestAnimationFrame(rm); setTimeout(rm, 150); } else el.remove();
+  }
+}
+// Send a card that is on the table to a player (or anywhere), shrinking as it goes.
+async function fxAway(fromSel, toEl, { fade = false, clear } = {}) {
+  if (!FX.motion()) return;
+  const from = $(fromSel);
+  if (!from || !toEl) return;
+  const a = from.getBoundingClientRect(), b = toEl.getBoundingClientRect();
+  if (!a.width) return;
+  const el = makeFly(a, `<div class="fly-inner"><div class="face solo">${stripIds(from.outerHTML)}</div></div>`);
+  if (clear) clear();
+  const [dx, dy] = centerDelta(b, a);
+  const s = Math.max(0.2, 40 / a.width);
+  try {
+    await fxWait(el.animate([{ transform: 'translate(0, 0) scale(1)', opacity: 1 }, { transform: `translate(${dx}px, ${dy}px) scale(${s})`, opacity: fade ? 0 : 1 }], { duration: 480 * FX.k(), easing: 'cubic-bezier(.5, 0, .3, 1)', fill: 'both' }));
+  } finally { el.remove(); }
+}
+async function fxDiscard(fromSel, clear) {
+  if (!FX.motion()) return;
+  const from = $(fromSel);
+  if (!from) return;
+  const a = from.getBoundingClientRect();
+  if (!a.width) return;
+  const el = makeFly(a, `<div class="fly-inner"><div class="face solo">${stripIds(from.outerHTML)}</div></div>`);
+  if (clear) clear();
+  try {
+    await fxWait(el.animate([{ transform: 'none', opacity: 1 }, { transform: 'translate(26px, 64px) rotate(14deg) scale(.85)', opacity: 0 }], { duration: 380 * FX.k(), easing: 'ease-in', fill: 'both' }));
+  } finally { el.remove(); }
+}
+function fxFloat(target, text, cls = '') {
+  if (typeof document.body.animate !== 'function' || !target) return;
+  const r = target.getBoundingClientRect();
+  if (!r.width) return;
+  const f = document.createElement('div');
+  f.className = `floaty ${cls}`;
+  f.textContent = text;
+  f.style.left = `${r.left + r.width / 2}px`; f.style.top = `${r.top + r.height / 2}px`;
+  $('#fx').appendChild(f);
+  const frames = FX.motion()
+    ? [{ transform: 'translate(-50%, -30%) scale(.7)', opacity: 0 }, { transform: 'translate(-50%, -75%) scale(1.15)', opacity: 1, offset: 0.18 }, { transform: 'translate(-50%, -200%) scale(1)', opacity: 0 }]
+    : [{ opacity: 0 }, { opacity: 1, offset: 0.2 }, { opacity: 0 }];
+  f.animate(frames, { duration: 1500 * Math.max(FX.k(), 0.8), easing: 'ease-out', fill: 'forwards' }).finished.then(() => f.remove(), () => f.remove());
+}
+async function fxCoins(fromEl, toEl, n = 3, delay = 0) {
+  if (!FX.motion() || !fromEl || !toEl) return;
+  const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
+  const [dx, dy] = centerDelta(b, a);
+  const k = FX.k();
+  let last = null;
+  for (let c = 0; c < n; c++) {
+    const el = document.createElement('div');
+    el.className = 'coin';
+    el.style.left = `${a.left + a.width / 2}px`; el.style.top = `${a.top + a.height / 2}px`;
+    $('#fx').appendChild(el);
+    const lift = -50 - c * 18;
+    last = el.animate([{ transform: 'translate(0, 0) scale(.6)', opacity: 0 }, { transform: `translate(${dx * 0.5}px, ${dy * 0.5 + lift}px) scale(1)`, opacity: 1, offset: 0.5 }, { transform: `translate(${dx}px, ${dy}px) scale(.8)`, opacity: 0.9 }], { duration: 620 * k, delay: delay + c * 70 * k, easing: 'ease-in-out', fill: 'both' });
+    last.finished.then(() => el.remove(), () => el.remove());
+  }
+  if (last) await fxWait(last);
+}
+async function fxBanner(title, sub) {
+  SFX.play('gong');
+  if (!FX.motion()) return;
+  const el = document.createElement('div');
+  el.className = 'banner';
+  el.innerHTML = `<b>${title}</b><span>${sub}</span>`;
+  $('#fx').appendChild(el);
+  try {
+    await fxWait(el.animate([{ opacity: 0, transform: 'translate(-50%, -50%) scale(.8)' }, { opacity: 1, transform: 'translate(-50%, -50%) scale(1)', offset: 0.2 }, { opacity: 1, transform: 'translate(-50%, -50%) scale(1)', offset: 0.75 }, { opacity: 0, transform: 'translate(-50%, -50%) scale(1.05)' }], { duration: 1300 * FX.k(), easing: 'ease-out', fill: 'both' }));
+  } finally { el.remove(); }
+}
+function fxShake(i) {
+  const el = panelEl(i);
+  if (!el || !FX.motion()) return;
+  el.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-7px)' }, { transform: 'translateX(7px)' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(0)' }], { duration: 380 });
+}
+function fxRing(i) {
+  const p = panelEl(i);
+  if (!p || !FX.motion()) return;
+  const r = p.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'ring';
+  el.style.left = `${r.left}px`; el.style.top = `${r.top}px`; el.style.width = `${r.width}px`; el.style.height = `${r.height}px`;
+  $('#fx').appendChild(el);
+  el.animate([{ transform: 'scale(.94)', opacity: 1 }, { transform: 'scale(1.06)', opacity: 0 }], { duration: 700, easing: 'ease-out', fill: 'forwards' }).finished.then(() => el.remove(), () => el.remove());
+}
+async function fxToken(fromI, toI) {
+  if (!FX.motion()) return;
+  const a = panelEl(fromI), b = panelEl(toI);
+  if (!a || !b) return;
+  const ra = (a.querySelector('.startmark') || a).getBoundingClientRect(), rb = b.getBoundingClientRect();
+  const sx = ra.left + ra.width / 2, sy = ra.top + ra.height / 2, ex = rb.right - 22, ey = rb.top + 20;
+  const el = document.createElement('div');
+  el.className = 'token';
+  el.textContent = '起';
+  el.style.left = `${sx}px`; el.style.top = `${sy}px`;
+  $('#fx').appendChild(el);
+  try {
+    await fxWait(el.animate([{ transform: 'translate(-50%, -50%) scale(1)' }, { transform: `translate(calc(-50% + ${(ex - sx) / 2}px), calc(-50% + ${(ey - sy) / 2 - 40}px)) scale(1.4)`, offset: 0.5 }, { transform: `translate(calc(-50% + ${ex - sx}px), calc(-50% + ${ey - sy}px)) scale(1)` }], { duration: 650 * FX.k(), easing: 'ease-in-out', fill: 'both' }));
+  } finally { el.remove(); }
+}
+function fxConfetti() {
+  if (!FX.motion()) return;
+  const cv = document.createElement('canvas');
+  cv.className = 'confetti';
+  document.body.appendChild(cv);
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
+  const g = cv.getContext('2d');
+  if (!g) { cv.remove(); return; }
+  g.scale(dpr, dpr);
+  const colors = ['#efbe4f', '#f1d59a', '#e0674a', '#5fc7b3', '#8fb4ff', '#ee8fab'];
+  const parts = Array.from({ length: 170 }, () => ({ x: innerWidth / 2 + (Math.random() - 0.5) * 220, y: innerHeight * 0.35, vx: (Math.random() - 0.5) * 13, vy: -Math.random() * 13 - 4, w: 6 + Math.random() * 6, h: 8 + Math.random() * 8, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3, c: colors[(Math.random() * colors.length) | 0] }));
+  const t0 = performance.now();
+  const step = (t) => {
+    g.clearRect(0, 0, innerWidth, innerHeight);
+    parts.forEach((q) => { q.vy += 0.33; q.vx *= 0.99; q.x += q.vx; q.y += q.vy; q.r += q.vr; g.save(); g.translate(q.x, q.y); g.rotate(q.r); g.fillStyle = q.c; g.fillRect(-q.w / 2, -q.h / 2, q.w, q.h); g.restore(); });
+    if (t - t0 < 3400) requestAnimationFrame(step); else cv.remove();
+  };
+  requestAnimationFrame(step);
+}
+
+/* animated cash counters */
+const counters = {};
+let lastCash = {};
+let rafId = 0;
+function cashShown(p) { const c = counters[p.i]; return c ? c.cur : p.cash; }
+function syncCounters() {
+  if (!G) return;
+  const now = performance.now();
+  G.players.forEach((p) => {
+    const prev = lastCash[p.i];
+    lastCash[p.i] = p.cash;
+    if (prev === undefined || prev === p.cash || !FX.motion()) return;
+    const c = counters[p.i];
+    const from = c ? c.cur : prev;
+    counters[p.i] = { from, to: p.cash, cur: from, t0: now, dur: 700 * FX.k(), flash: true };
+  });
+  if (!rafId && Object.keys(counters).length) rafId = requestAnimationFrame(stepCounters);
+}
+function stepCounters(t) {
+  rafId = 0;
+  Object.keys(counters).forEach((i) => {
+    const c = counters[i];
+    const x = Math.min(1, Math.max(0, (t - c.t0) / c.dur));
+    c.cur = Math.round((c.from + (c.to - c.from) * (1 - Math.pow(1 - x, 3))) / 100) * 100;
+    if (x >= 1) { c.cur = c.to; delete counters[i]; }
+    const p = G && G.players[+i];
+    const el = document.querySelector(`[data-cash="${i}"]`);
+    if (el && p && showCashOf(p)) el.textContent = money(c.cur);
+  });
+  if (Object.keys(counters).length) rafId = requestAnimationFrame(stepCounters);
+}
+function resetView() {
+  Object.keys(counters).forEach((k) => delete counters[k]);
+  lastCash = {};
+  PICK = null;
+  ACTING = null;
+}
+
+/* ================= state ================= */
+function newGame() {
+  RUN++;
+  if (pending) { try { pending.rej(new Abort()); } catch (e) { /* ignore */ } pending = null; }
+  resetView();
+  UID = 0;
+  const seats = CFG.seats.slice(0, CFG.n);
+  const roles = shuffle(ROLES.slice());
+  const ev = [], low = [], high = [], auc = [];
+  FUN_DEF.forEach(([name, joy, cost, n, pet]) => { for (let k = 0; k < n; k++) ev.push({ type: 'fun', name, joy, cost, pet: !!pet, uid: ++UID }); });
+  CHANCE_NAMES.forEach((name) => ev.push({ type: 'chance', name, uid: ++UID }));
+  GOD_DEF.forEach((g) => { for (let k = 0; k < g.n; k++) ev.push({ type: 'god', ...g, uid: ++UID }); });
+  LOW_DEF.forEach(([name, amount, n]) => { for (let k = 0; k < n; k++) low.push({ type: 'low', name, amount, uid: ++UID }); });
+  HIGH_DEF.forEach(([name, amount, n]) => { for (let k = 0; k < n; k++) high.push({ type: 'high', name, amount, uid: ++UID }); });
+  AUCTION_DEF.forEach((a) => { for (let k = 0; k < a.n; k++) auc.push({ type: 'auction', ...a, uid: ++UID }); });
+  G = {
+    round: 0, phase: 'setup', start: Math.floor(Math.random() * seats.length), cur: -1,
+    sky: null, skyFlip: false, stage: null, auction: null, log: [], seen: {},
+    players: seats.map((s, i) => ({
+      i, name: clean(s.name) || DEFAULT_NAMES[i], ai: !!s.ai, color: `var(--seat-${i + 1})`, role: roles[i],
+      cash: roles[i].cash, front: [], marks: [], hand: [], lows: 0, loans: 0, last: '', lastAt: 0,
+      aggr: 0.55 + Math.random() * 0.5, // computer players' bidding style, from cautious to bold
+    })),
+    decks: { event: shuffle(ev), low: shuffle(low), high: shuffle(high), auction: [], sky: shuffle(SKY_DEF.map((s) => ({ type: 'sky', ...s }))).slice(0, 6) },
+    disc: { event: [], low: [], high: [] },
+  };
+  const ll = G.players.find((p) => p.role.id === 'landlord');
+  if (ll) { const k = auc.findIndex((c) => c.id === 'suite'); ll.front.push(auc.splice(k, 1)[0]); }
+  G.decks.auction = shuffle(auc);
+}
+
+const humans = () => G.players.filter((p) => !p.ai).length;
+const joyOf = (p) => p.role.joy + p.front.reduce((s, c) => s + (c.joy || 0), 0) - p.lows;
+const hasPet = (p) => p.front.some((c) => c.pet);
+function assetValue(c) {
+  if (c.value) return c.value;
+  if (c.dice) return c.diceValue !== undefined ? c.diceValue : 4000;
+  return 0;
+}
+// Final score: money on the table plus happiness converted to money at JOY_VALUE per point.
+function scores(p) {
+  const assets = p.front.reduce((s, c) => s + assetValue(c), 0);
+  const w = p.cash + assets - p.loans * 6000;
+  const j = Math.max(0, joyOf(p));
+  const jv = j * JOY_VALUE;
+  return { w, j, jv, total: w + jv, assets };
+}
+function funCost(card) {
+  let c = card.cost;
+  if (G.sky && G.sky.id === 'joydown') c = Math.max(0, c - 500);
+  if (G.sky && G.sky.id === 'joyaway') c += 500;
+  return c;
+}
+function draw(name) {
+  if (!G.decks[name].length) {
+    if (!G.disc[name] || !G.disc[name].length) return null;
+    G.decks[name] = shuffle(G.disc[name]);
+    G.disc[name] = [];
+    log(`${name === 'event' ? '事件牌' : name === 'low' ? '低風險牌' : '高風險牌'}抽完了，把棄牌洗勻重新使用。`);
+    SFX.play('shuffle');
+  }
+  return G.decks[name].shift();
+}
+function log(t) { G.log.unshift({ r: G.round, t }); if (G.log.length > 300) G.log.pop(); }
+// Each seat keeps a one-line note of that player's latest move, so nothing is missed if an animation flies past.
+function setLast(p, text) { p.last = text; p.lastAt = performance.now(); }
+function takeLoan(p) {
+  if (p.loans >= 3) return false;
+  p.loans++; p.cash += 5000;
+  log(`${p.name} 向天庭錢莊貸款 5,000（第 ${p.loans} 張）。`);
+  SFX.play('stamp');
+  fxFloat(cashEl(p), '+5,000 借款', 'pos');
+  return true;
+}
+function payForced(p, amt) {
+  let loans = 0;
+  while (p.cash < amt && p.loans < 3) { takeLoan(p); loans++; }
+  if (loans && !p.ai) toast(`現金不夠，自動向天庭錢莊借了 ${loans} 張（每張 5,000）。`, { kind: 'bad' });
+  if (p.cash >= amt) { p.cash -= amt; return { paid: amt, loans, bankrupt: false }; }
+  const paid = p.cash; p.cash = 0; p.lows += 2;
+  log(`${p.name} 破產了：付光 ${money(paid)}，剩下的不用付，但拿 2 張低落牌。`);
+  SFX.play('lose');
+  fxFloat(joyEl(p), '破產 ☹☹', 'low');
+  if (!p.ai) toast('已經借滿 3 張還是付不出來：付光現金，其餘免付，拿 2 張低落牌。', { kind: 'bad', title: '破產了' });
+  return { paid, loans, bankrupt: true };
+}
+
+/* ================= prompts & pacing ================= */
+function ask(o) {
+  const run = RUN;
+  return new Promise((res, rej) => {
+    pending = { res, rej };
+    renderAction(o, (v) => { if (run !== RUN) return; pending = null; res(v); });
+  });
+}
+async function pause(ms) {
+  const run = RUN;
+  await new Promise((r) => setTimeout(r, ms));
+  while (PAUSED && run === RUN) await new Promise((r) => setTimeout(r, 200));
+  if (run !== RUN) throw new Abort();
+}
+const D = () => SPEED[CFG.speed] || 800;
+async function say(o, mult = 1) { renderAction(o); await pause(D() * mult); }
+// Results only need to be seen, not confirmed: they stay in the dock for a moment and the game moves on.
+async function ackFor(p, o) { return say({ ...o, who: p }, p && !p.ai ? 1.7 : 1.3); }
+async function ackGlobal(o) { return say(o, 1.3); }
+// Everyone's cash and happiness stay on the table for all to see.
+function showCashOf() { return true; }
+
+/* ================= rendering ================= */
+function backHTML(type) {
+  const [col, seal] = BACKS[type] || BACKS.event;
+  return `<span class="cback" style="--cc:${col}"><span class="seal">${seal}</span></span>`;
+}
+function cardHTML(c, o = {}) {
+  if (!c) return '';
+  const cls = ['card', o.size || '', o.flip ? 'flip' : '', o.tilt ? 'tilt' : '', o.glow ? 'glow' : ''].filter(Boolean).join(' ');
+  const id = o.id ? ` id="${o.id}"` : '';
+  if (c.back) return `<div class="${cls} back-card"${id} role="img" aria-label="蓋著的牌">${backHTML(c.back)}</div>`;
+  const [lb, col] = TYPE[c.type];
+  const mark = c.type === 'god' ? (FAMILY_MARK[c.family] || '神') : MARKS[c.type];
+  let inner = '';
+  switch (c.type) {
+    case 'fun':
+      inner = `<div class="ttl">${c.name}${c.pet ? ' ✿' : ''}</div><div class="joy">${joyStr(c.joy)}</div><div class="amt neg">−${fmt(c.cost)}</div>${c.pet ? '<div class="fx">寵物：之後忍住不花，也不用拿低落牌</div>' : ''}`;
+      break;
+    case 'chance':
+      inner = `<div class="ttl">${c.name}</div><div class="fx">選低風險或高風險牌堆，翻開一張照金額收付。</div>`;
+      break;
+    case 'god':
+      inner = `<div class="fam">${c.family}</div><div class="ttl">${c.name}</div><div class="fx">${c.text}</div>`;
+      break;
+    case 'low': case 'high':
+      inner = `<div class="ttl">${c.name}</div><div class="amt ${c.amount >= 0 ? 'pos' : 'neg'}">${signed(c.amount)}</div>`;
+      break;
+    case 'auction':
+      inner = `<div class="ttl">${c.name}</div>${c.joy ? `<div class="joy">${joyStr(c.joy)}</div>` : ''}<div class="min">底價 ${fmt(c.min)}</div><div class="fx">${c.text}</div>`;
+      break;
+    case 'sky':
+      inner = `<div class="ttl">${c.name}</div><div class="fx">${c.text}</div>`;
+      break;
+  }
+  return `<div class="${cls}"${id} style="--cc:${col}" data-mark="${mark}"><div class="band">${lb}</div><div class="body">${inner}</div><i class="sheen"></i></div>`;
+}
+function pickHTML(x, k) {
+  const face = x.hidden ? cardHTML({ back: 'god' }, { size: 'sm' }) : cardHTML(x.card, { size: 'sm', tilt: !!x.v, flip: x.flip });
+  const label = x.hidden ? '蓋著的神明卡' : x.card.name;
+  return `<button type="button" class="cardpick" data-pi="${k}" ${x.v ? '' : 'disabled'} aria-label="${label}：${x.note}">${face}<span class="cp-note">${x.note}</span></button>`;
+}
+function renderAction(o, done) {
+  const el = $('#action');
+  const p = o.who;
+  PICK = null;
+  const subs = (o.opts || []).filter((x) => x.sub);
+  const help = (o.help ? `<p>${o.help}</p>` : '') + (subs.length ? `<dl>${subs.map((x) => `<dt>${x.label}</dt><dd>${x.sub}</dd>`).join('')}</dl>` : '');
+  const shownOpts = (o.opts || []).filter((x) => !x.hide);
+  el.innerHTML = `
+    <div class="dock-top">${p ? `<span class="who" style="--pc:${p.color}"><span class="dot"></span>${p.name}${p.ai ? ' · 電腦' : ''}</span>` : ''}${help ? '<button type="button" class="ibtn sm helpbtn" aria-expanded="false" aria-label="說明" title="說明">?</button>' : ''}</div>
+    <h3>${o.title}</h3>
+    ${o.body ? `<div class="body">${o.body}</div>` : ''}
+    ${o.cards ? `<div class="acards">${o.cards.map((c) => cardHTML(c, { size: 'sm', flip: !!o.flip })).join('')}</div>` : ''}
+    ${o.picks && o.picks.length ? `<div class="picks">${o.picks.map(pickHTML).join('')}</div>` : ''}
+    ${shownOpts.length ? `<div class="opts">${o.opts.map((x, i) => (x.hide ? '' : `<button type="button" class="opt ${x.ghost ? 'ghost' : ''}" data-i="${i}" ${x.disabled ? 'disabled' : ''}>${x.label}</button>`)).join('')}</div>` : ''}
+    ${help ? `<div class="helpbox" hidden>${help}</div>` : ''}`;
+  const hb = el.querySelector('.helpbtn');
+  if (hb) hb.onclick = () => { const box = el.querySelector('.helpbox'); box.hidden = !box.hidden; hb.setAttribute('aria-expanded', String(!box.hidden)); };
+  setActing(done && p && !p.ai ? p.i : null);
+  if (done) {
+    let used = false;
+    const finish = (v) => {
+      if (used) return;
+      used = true;
+      el.querySelectorAll('.opt, .cardpick').forEach((x) => { x.disabled = true; });
+      PICK = null;
+      applyPicks();
+      setActing(null);
+      done(v);
+    };
+    if (o.opts) el.querySelectorAll('.opt').forEach((b) => { b.onclick = () => finish(o.opts[+b.dataset.i].v); });
+    if (o.picks) el.querySelectorAll('.cardpick').forEach((b) => { b.onclick = () => finish(o.picks[+b.dataset.pi].v); });
+    const map = {};
+    (o.opts || []).forEach((x) => { if (x.pile && !x.disabled) map[x.pile] = x.v; });
+    if (Object.keys(map).length) PICK = { map, finish };
+    const first = el.querySelector('.opt:not(:disabled)');
+    if (first && window.matchMedia('(min-width: 1001px)').matches) first.focus({ preventScroll: true });
+  }
+  applyPicks();
+}
+function setActing(i) {
+  ACTING = i;
+  document.querySelectorAll('.seat').forEach((s) => s.classList.toggle('acting', +s.dataset.i === i));
+}
+function applyPicks() {
+  document.querySelectorAll('[data-pile]').forEach((b) => {
+    const on = !!(PICK && Object.prototype.hasOwnProperty.call(PICK.map, b.dataset.pile));
+    b.classList.toggle('pickable', on);
+    b.disabled = !on;
+    b.title = on ? '點一下' : '';
+  });
+}
+
+function miniHTML(c) {
+  const col = c.type === 'fun' ? 'var(--fun)' : c.type === 'auction' ? 'var(--auction)' : 'var(--god)';
+  const pip = c.type === 'god' ? (MARK_PIP[c.god] || '') : c.joy ? joyStr(c.joy) : c.value ? `$${c.value / 1000}k` : c.dice ? '?' : '';
+  const tip = c.type === 'fun' ? `${c.name}：開心值 +${c.joy}${c.pet ? '（寵物）' : ''}` : `${c.name}：${c.text}`;
+  return `<span class="mini${c.type === 'god' ? ' mark' : ''}" style="--cc:${col}" data-uid="${c.uid}" title="${tip}"><b>${c.name}${c.pet ? '✿' : ''}</b>${pip ? `<i>${pip}</i>` : ''}</span>`;
+}
+function lastHTML(p) {
+  // A fresh note glows briefly; re-renders continue the glow instead of restarting it.
+  const age = p.lastAt ? performance.now() - p.lastAt : Infinity;
+  const fresh = age < 2200 ? ` fresh" style="animation-delay:-${Math.round(age)}ms` : '';
+  return `<div class="last${fresh}" data-last="${p.i}" title="${p.last}">${p.last ? `最近：${p.last}` : '還沒有行動'}</div>`;
+}
+function playerHTML(p) {
+  const s = scores(p);
+  const c = counters[p.i];
+  const flash = c && c.flash ? (c.to > c.from ? 'up' : 'down') : '';
+  const area = (SEAT_AREAS[G.players.length] || SEAT_AREAS[4])[p.i];
+  const minis = [...p.front.map(miniHTML), ...p.marks.map(miniHTML)];
+  if (p.lows) minis.push(`<span class="mini token" style="--cc:var(--down)" title="低落牌：每張讓開心值 −1"><b>☹</b><i>×${p.lows}</i></span>`);
+  if (p.loans) minis.push(`<span class="mini token" style="--cc:var(--loan)" title="貸款：每張結算時扣 6,000"><b>借據</b><i>×${p.loans}</i></span>`);
+  // The lamp blinks while this seat is still deciding a bid, and stays lit once the fist is closed.
+  const a = G.auction;
+  const lamp = a && !a.result && !a.hidden ? (a.done.has(p.i) ? 'ready' : 'think') : '';
+  const cls = ['seat', `at-${area}`, G.cur === p.i ? 'active' : '', ACTING === p.i ? 'acting' : ''].filter(Boolean).join(' ');
+  return `<article class="${cls}" data-i="${p.i}" style="--pc:${p.color}" aria-label="${p.name}，${p.role.name}${G.cur === p.i ? '，目前回合' : ''}">
+    <div class="hd">
+      <div class="avatar" aria-hidden="true">${ROLE_GLYPH[p.role.id] || p.role.name[0]}${G.start === p.i && G.phase !== 'end' ? '<span class="startmark" title="起始玩家">起</span>' : ''}</div>
+      <div class="who2"><span class="nm"><span class="lamp ${lamp}"></span><span class="nmt">${p.name}</span>${p.ai ? '<span class="ai">電腦</span>' : ''}</span><span class="rl">${p.role.name}</span></div>
+      <span class="hand" data-hand="${p.i}" title="手牌：神明卡 ${p.hand.length} 張">${'<i></i>'.repeat(Math.min(p.hand.length, 8))}</span>
+    </div>
+    <div class="nums"><span class="cash ${flash}" data-cash="${p.i}" title="現金">${money(cashShown(p))}</span><span class="joy" data-joy="${p.i}" title="開心值">☺ ${joyOf(p)}</span></div>
+    ${lastHTML(p)}
+    <div class="front" data-front="${p.i}">${minis.join('') || '<span class="none">面前還沒有牌</span>'}</div>
+    <div class="score" title="總分 ＝ 現金 ＋ 拍賣牌價值 − 貸款 ＋ 開心值 × 1,000"><span>開心換算 +${fmt(s.jv)}</span><b>總分 ${money(s.total)}</b></div>
+  </article>`;
+}
+// The pile the current step is using is lit; the others dim, so the table shows where the game is.
+function pileState(id) {
+  const focus = [].concat(G.focus || []);
+  return focus.length ? (focus.includes(id) ? 'lit' : 'dim') : '';
+}
+function pileHTML(id, label, n) {
+  const [col, seal] = BACKS[id];
+  const depth = n > 8 ? 'deep' : n > 3 ? 'mid' : n > 0 ? 'thin' : 'none';
+  return `<button type="button" class="pile ${pileState(id)}" data-pile="${id}" disabled aria-label="${label}牌堆，剩 ${n} 張"><span class="stack ${depth}" style="--cc:${col}">${n ? `<span class="cback" style="--cc:${col}"><span class="seal">${seal}</span></span>` : ''}<b class="cnt">${n}</b></span><span class="pl-l">${label}</span></button>`;
+}
+
+function renderTop() {
+  const r = G ? G.round : 0;
+  const ended = G && G.phase === 'end';
+  $('#round').innerHTML = `${[1, 2, 3, 4, 5, 6].map((k) => `<i class="${ended || k < r ? 'done' : k === r ? 'now' : ''}"></i>`).join('')}<span>${!G || r === 0 ? '準備中' : ended ? '遊戲結束' : `第 ${r} / 6 回合`}</span>`;
+  const idx = G ? STEPS.findIndex((s) => s[0] === G.phase) : -1;
+  $('#steps').innerHTML = STEPS.map(([, l], i) => `<li class="${i === idx ? 'on' : ''}">${l}</li>`).join('');
+}
+function renderPlayers() {
+  $('#players').innerHTML = G ? G.players.map(playerHTML).join('') : '';
+  $('#table').classList.toggle('focus', !!G && G.cur >= 0);
+  Object.values(counters).forEach((c) => { c.flash = false; });
+}
+function renderBoard() {
+  const b = $('#board');
+  if (!G) { b.innerHTML = ''; return; }
+  const motion = FX.motion();
+  let sky;
+  if (G.skyHidden) sky = '<div class="card sm slot-ph" id="sky-slot"></div>';
+  else if (G.sky) sky = cardHTML(G.sky, { size: 'sm', id: 'sky-slot', tilt: true, flip: G.skyFlip && !motion });
+  else sky = '<div class="card sm ghost" id="sky-slot"><div class="body"><div class="fx">還沒翻開</div></div></div>';
+  G.skyFlip = false;
+  const piles = [['event', '事件', G.decks.event.length], ['low', '低風險', G.decks.low.length], ['high', '高風險', G.decks.high.length], ['auction', '拍賣', G.decks.auction.length], ['sky', '天象', G.decks.sky.length]];
+  let stage = '';
+  if (G.auction) {
+    const a = G.auction;
+    const order = G.players.map((_, k) => G.players[(G.start + k) % G.players.length]);
+    const lot = a.hidden ? '<div class="card slot-ph" id="auc-slot"></div>' : a.gone ? '<div class="card slot-ph"></div>' : cardHTML(a.card, { id: 'auc-card', tilt: true, flip: a.flip && !motion });
+    stage = `<div class="auc"><div><div class="cap">天庭拍賣會</div>${lot}</div><div class="bidlist">${order.map((p) => {
+      const shown = a.shown.has(p.i);
+      const bid = a.bids[p.i];
+      const st = shown ? (bid > 0 ? money(bid) : '空拳') : a.done.has(p.i) ? '已握拳' : '出價中…';
+      let tag = '';
+      if (a.result) {
+        if (a.result.winner === p.i) tag = '<span class="tg win">得標</span>';
+        else if (a.result.seconds.includes(p.i)) tag = `<span class="tg sec">抽成 ${fmt(Math.floor(bid / 2 / 500) * 500)}</span>`;
+      }
+      return `<div class="bidrow ${shown ? 'shown' : ''}" data-bid="${p.i}" style="--pc:${p.color}"><span class="dot"></span><span class="bn">${p.name}</span>${tag}<span class="bv">${st}</span></div>`;
+    }).join('')}</div></div>`;
+    a.flip = false;
+  } else if (G.stage) {
+    const s = G.stage;
+    if (s.ph) stage = `<div><div class="cap">${s.caption}</div><div class="stagecards"><div class="card slot-ph" id="stage-slot"></div>${s.ph === 2 ? '<div class="card slot-ph" id="stage-slot-2"></div>' : ''}</div></div>`;
+    else if (s.cards) stage = `<div><div class="cap">${s.caption}</div><div class="stagecards">${s.cards.map((c, k) => cardHTML(c, { id: k ? 'stage-card-2' : 'stage-card', tilt: true, flip: s.flip && !motion })).join('')}</div></div>`;
+    else stage = `<div><div class="cap">${s.caption}</div>${cardHTML(s.card, { id: 'stage-card', tilt: true, glow: s.glow, flip: s.flip && !motion })}</div>`;
+    s.flip = false;
+  } else {
+    stage = `<p class="empty-note">${G.phase === 'end' ? '遊戲結束。' : '抽到的牌會翻開在這裡。'}</p>`;
+  }
+  b.innerHTML = `
+    <div class="tableside">
+      <div class="slot"><div class="lbl">天象</div>${sky}</div>
+      <div class="piles">${piles.map(([id, l, n]) => pileHTML(id, l, n)).join('')}<div class="pile bankpile ${pileState('bank')}"><span class="stack coinstack" id="bank">$</span><span class="pl-l">銀行</span></div></div>
+    </div>
+    <div class="stage">${stage}</div>`;
+  applyPicks();
+}
+function renderLog() { $('#log').innerHTML = G ? G.log.map((e) => `<li><span class="r">R${e.r}</span><span>${e.t}</span></li>`).join('') : ''; }
+function render() { syncCounters(); renderTop(); renderPlayers(); renderBoard(); renderLog(); }
+
+/* ================= game flow ================= */
+async function runGame() {
+  try {
+    for (let r = 1; r <= 6; r++) {
+      G.round = r;
+      await phaseSky();
+      await phasePayday();
+      await phaseTurns();
+      await phaseAuction();
+      await phaseRoundEnd();
+    }
+    await finish();
+  } catch (e) {
+    if (!(e instanceof Abort)) { console.error(e); renderAction({ title: '發生錯誤', body: '遊戲流程出錯了，請按右上角的「新遊戲」重新開始。' }); }
+  }
+}
+
+async function phaseSky() {
+  G.phase = 'sky'; G.stage = null; G.cur = -1; G.focus = 'sky';
+  G.skyHidden = true;
+  render();
+  tipOnce('step-sky', GUIDE.sky[1], GUIDE.sky[0]);
+  await fxBanner(`第 ${G.round} 回合`, G.round === 6 ? '最後一回合' : `還有 ${6 - G.round} 回合`);
+  // The start player turns the sky card over; a human does it by clicking the pile.
+  const starter = G.players[G.start];
+  if (!starter.ai) await ask({ who: starter, title: '翻開天象', body: '你是起始玩家，點發光的天象牌堆，翻開本回合的天象。', opts: [{ label: '翻開天象', v: 1, pile: 'sky', hide: true }] });
+  else await say({ who: starter, title: '翻開天象', body: `起始玩家 ${starter.name} 翻開本回合的天象。` }, 0.5);
+  G.sky = G.decks.sky.shift(); G.skyFlip = true;
+  log(`第 ${G.round} 回合開始。天象：${G.sky.name}。`);
+  render();
+  await fxDraw('[data-pile="sky"]', '#sky-slot', G.sky, { back: 'sky' });
+  G.skyHidden = false;
+  render();
+  toast(G.sky.text, { title: `天象：${G.sky.name}`, ttl: 6500 });
+  await ackGlobal({ title: `第 ${G.round} 回合`, body: `天象「${G.sky.name}」：${G.sky.text}`, cards: [G.sky] });
+}
+
+async function phasePayday() {
+  G.phase = 'payday';
+  G.focus = 'bank';
+  const gains = [];
+  const lines = G.players.map((p) => {
+    const inc = p.role.income * (G.sky.id === 'redpacket' ? 2 : 1);
+    const rent = p.front.reduce((s, c) => s + (c.rent || 0), 0) * (G.sky.id === 'rent' ? 2 : 1);
+    p.cash += inc + rent;
+    gains.push([p, inc + rent]);
+    let t = `${p.name} +${fmt(inc + rent)}`;
+    if (G.sky.id === 'matchmaker' && p.lows > 0) { p.lows--; t += '，棄 1 張低落牌'; }
+    return `<li>${t}</li>`;
+  });
+  log('發薪日：每人領取收入與租金。');
+  render();
+  tipOnce('step-payday', GUIDE.payday[1], GUIDE.payday[0]);
+  await fxPayday(gains);
+  await ackGlobal({ title: '發薪日', body: `<ul class="lines">${lines.join('')}</ul>` });
+}
+async function fxPayday(gains) {
+  if (!FX.motion()) return;
+  SFX.play('coins');
+  const bank = $('#bank');
+  await Promise.all(gains.map(([p, amt], k) => fxCoins(bank, cashEl(p), 3, k * 90).then(() => fxFloat(cashEl(p), `+${fmt(amt)}`, 'pos'))));
+}
+
+async function phaseTurns() {
+  G.phase = 'turns';
+  tipOnce('step-turns', GUIDE.turns[1], GUIDE.turns[0]);
+  const n = G.players.length;
+  for (let k = 0; k < n; k++) {
+    const p = G.players[(G.start + k) % n];
+    G.cur = p.i; G.stage = null;
+    render();
+    await playerTurn(p);
+  }
+  G.cur = -1;
+  render();
+}
+
+async function playerTurn(p) {
+  G.focus = 'event';
+  if (p.ai) {
+    await say({ who: p, title: `${p.name} 的回合`, body: `${p.role.name}正在盤算…` }, 0.8);
+    await aiGod(p);
+  } else {
+    if (humans() > 1) toast(`輪到 ${p.name}`, { ttl: 2600 });
+    let played = false, peeked = humans() === 1, justPeeked = false;
+    for (;;) {
+      const playable = p.hand.filter((c) => c.god !== 'amulet' && c.drawnRound < G.round);
+      const waiting = p.hand.filter((c) => c.god !== 'amulet' && c.drawnRound >= G.round).length;
+      const amulets = p.hand.filter((c) => c.god === 'amulet').length;
+      const opts = [{ label: '抽牌', sub: '點發光的事件牌堆，抽一張事件牌：娛樂、投資機會或神明卡。', v: 'draw', pile: 'event', hide: true }];
+      if (!peeked && p.hand.length) opts.push({ label: '查看手牌', sub: '手牌要保密，請其他人先別看螢幕。', v: 'peek', ghost: true });
+      if (p.loans < 3) opts.push({ label: '貸款 +5,000', sub: `向天庭錢莊借 5,000，結算時每張扣 6,000。目前 ${p.loans}/3 張。`, v: 'loan', ghost: true });
+      if (p.loans > 0) opts.push({ label: '還款 −6,000', sub: '付 6,000 還掉 1 張貸款。', v: 'repay', ghost: true, disabled: p.cash < 6000 });
+      const notes = [];
+      if (waiting) notes.push(`${waiting} 張神明卡是這回合才抽到的，下回合才能用。`);
+      if (amulets) notes.push('神明護身符會在有人對你出牌時問你要不要用。');
+      const picks = p.hand.map((c) => {
+        if (!peeked) return { card: c, hidden: true, v: null, note: '蓋著' };
+        const can = !played && c.god !== 'amulet' && c.drawnRound < G.round;
+        const note = c.god === 'amulet' ? '防守用' : c.drawnRound >= G.round ? '下回合可用' : played ? '這回合已出過' : '點一下打出';
+        return { card: c, v: can ? { play: c } : null, note, flip: justPeeked };
+      });
+      if (!played && playable.length) notes.unshift('點亮著的手牌就能打出神明卡，每回合最多 1 張，打完再抽牌。');
+      const body = !played && playable.length ? '可以先點手牌打出神明卡，再點發光的事件牌堆抽牌。' : '點發光的事件牌堆抽牌。';
+      const v = await ask({ who: p, title: '輪到你了', body, opts, picks, help: notes.join(' '), tip: tipOnce('short', '座位最下面是目前的總分：錢加上開心值換成的錢（1 點 = 1,000 元）。輪到你時，點發光的牌堆就會翻牌。') });
+      justPeeked = false;
+      if (v === 'draw') break;
+      if (v === 'peek') { peeked = true; justPeeked = true; SFX.play('flip'); continue; }
+      if (v === 'loan') takeLoan(p);
+      if (v === 'repay') { p.cash -= 6000; p.loans--; log(`${p.name} 還掉 1 張貸款（−6,000）。`); SFX.play('coin'); }
+      if (v === 'god' && await humanGod(p, playable)) played = true;
+      if (v && v.play && await humanGod(p, playable, v.play)) played = true;
+      render();
+    }
+  }
+  const card = draw('event');
+  if (!card) { log('事件牌全部用完了。'); return; }
+  const secret = card.type === 'god' && (p.ai || humans() > 1);
+  const face = secret ? { back: 'god' } : card;
+  G.stage = { ph: 1, caption: `${p.name} 抽到` };
+  render();
+  await fxDraw('[data-pile="event"]', '#stage-slot', face, { back: 'event' });
+  G.stage = { card: face, caption: `${p.name} 抽到`, flip: true };
+  render();
+  // Hold a computer's draw on the table long enough to read it.
+  if (p.ai && card.type !== 'god') await say({ who: p, title: `${p.name} 抽到「${card.name}」`, body: card.type === 'fun' ? `娛樂牌：開心值 +${card.joy}，花費 ${fmt(funCost(card))}。` : '投資機會：要選低風險還是高風險？', cards: [card] }, 1.1);
+  if (card.type === 'fun') await resolveFun(p, card);
+  else if (card.type === 'chance') await resolveChance(p, card);
+  else await resolveGodDraw(p, card);
+  render();
+}
+
+async function fxFunResult(p, card, enjoy, cost, tookLow) {
+  const clear = () => { G.stage = null; render(); };
+  if (enjoy) {
+    SFX.play('joy');
+    await fxAway('#stage-card', frontEl(p), { clear });
+    fxFloat(joyEl(p), `☺ +${card.joy}`, 'joy');
+    if (cost) fxFloat(cashEl(p), `−${fmt(cost)}`, 'neg');
+  } else {
+    await fxDiscard('#stage-card', clear);
+    if (tookLow) { SFX.play('sad'); fxFloat(joyEl(p), '☹ −1', 'low'); }
+  }
+}
+
+async function resolveFun(p, card) {
+  const cost = funCost(card);
+  const shown = { ...card, cost };
+  const prank = p.marks.find((m) => m.god === 'prank');
+  const pet = hasPet(p);
+  if (prank) {
+    p.marks = p.marks.filter((m) => m !== prank); G.disc.event.push(prank);
+    const r = payForced(p, cost); p.front.push(card);
+    const msg = `喜神惡作劇生效：${p.name} 一定要享受「${card.name}」，付 ${fmt(cost)}${r.loans ? `（現金不夠，自動貸款 ${r.loans} 張）` : ''}，開心值 +${card.joy}。`;
+    SFX.play('magic');
+    setLast(p, `被惡作劇：享受「${card.name}」☺+${card.joy} −${fmt(cost)}`);
+    toast(`${p.name} 一定要享受「${card.name}」。`, { title: '喜神惡作劇生效', kind: p.ai ? 'info' : 'bad' });
+    await fxFunResult(p, card, true, cost, false);
+    log(msg); render();
+    await ackFor(p, { title: `娛樂：${card.name}`, body: msg, cards: [shown] });
+    return;
+  }
+  let enjoy;
+  if (p.ai) {
+    enjoy = aiFun(p, card, cost);
+  } else {
+    let first = true;
+    for (;;) {
+      const opts = [{ label: `享受 −${fmt(cost)}`, sub: `付 ${fmt(cost)}，把牌放在面前，開心值 +${card.joy}。`, v: 'yes', disabled: p.cash < cost }];
+      if (p.cash < cost && p.loans < 3) opts.push({ label: '先貸款 +5,000', sub: `現金不夠。向錢莊借 5,000，結算時扣 6,000。目前 ${p.loans}/3 張。`, v: 'loan', ghost: true });
+      opts.push({ label: '忍住', sub: pet ? '有寵物陪你，忍住也不用拿低落牌。' : '不花錢，但要拿 1 張低落牌（開心值 −1）。', v: 'no', ghost: true });
+      let body = `開心值 +${card.joy}`;
+      if (cost !== card.cost) body += `，天象「${G.sky.name}」讓花費${cost < card.cost ? '少' : '多'} 500`;
+      if (p.cash < cost) body += '。現金不夠';
+      const v = await ask({ who: p, title: `娛樂：${card.name}`, body, cards: [shown], flip: first, opts, tip: tipOnce('fun', '享受就付錢，把牌放在面前拿 ☺；忍住不花要拿 1 張低落牌。買下小狗或小貓之後，忍住就不用拿低落牌。') });
+      first = false;
+      if (v === 'loan') { takeLoan(p); render(); continue; }
+      enjoy = v === 'yes';
+      break;
+    }
+  }
+  let msg;
+  if (enjoy) { p.cash -= cost; p.front.push(card); msg = `${p.name} 享受「${card.name}」，付 ${fmt(cost)}，開心值 +${card.joy}。`; }
+  else { G.disc.event.push(card); if (!pet) p.lows++; msg = `${p.name} 忍住不花「${card.name}」${pet ? '，有寵物陪，不拿低落牌' : '，拿 1 張低落牌'}。`; }
+  setLast(p, enjoy ? `享受「${card.name}」☺+${card.joy} −${fmt(cost)}` : `忍住「${card.name}」${pet ? '' : ' ☹−1'}`);
+  // A computer's choice is shown with the card still on the table, before it moves.
+  if (p.ai) await say({ who: p, title: `${p.name}${enjoy ? '享受' : '忍住不花'}「${card.name}」`, body: msg, cards: [shown] }, 1.4);
+  await fxFunResult(p, card, enjoy, cost, !enjoy && !pet);
+  log(msg); render();
+}
+
+async function resolveChance(p, card) {
+  G.disc.event.push(card);
+  const bless = p.marks.filter((m) => m.god === 'bless').length;
+  const frown = p.marks.filter((m) => m.god === 'frown').length;
+  let deck;
+  G.focus = ['low', 'high'];
+  render();
+  if (p.ai) {
+    deck = aiRisk(p);
+    G.focus = deck;
+    render();
+    await say({ who: p, title: `${p.name} 選擇${deck === 'low' ? '低' : '高'}風險`, body: `從${deck === 'low' ? '低' : '高'}風險牌堆翻一張。`, cards: [card] }, 1.1);
+  } else {
+    const mk = [];
+    if (bless) mk.push('財神眷顧 +2,000');
+    if (frown) mk.push(`財神翻臉 −${fmt(2000 * frown)}`);
+    const skyNote = G.sky.id === 'wealthday' ? '天象：高風險賺錢時多拿 1,000' : G.sky.id === 'thunder' ? '天象：高風險賠錢時多賠 1,000' : '';
+    const hasInsider = p.front.some((c) => c.id === 'insider');
+    const body = ['點發光的低風險或高風險牌堆翻牌。', hasInsider ? '內線消息：這次翻 2 張選 1 張。' : '', mk.length ? `生效中：${mk.join('、')}` : '', skyNote].filter(Boolean).join('<br>');
+    deck = await ask({
+      who: p, title: `投資機會：${card.name}`, body, cards: [card], flip: true,
+      opts: [
+        { label: '低風險', sub: '存錢、理財。平均 +750，12 張裡 3 張賠錢，最多賠 1,000。', v: 'low', pile: 'low', hide: true },
+        { label: '高風險', sub: '股票、房產、創業、刮刮樂。平均 +1,300，一半會賠錢，最多一次賠 6,000。', v: 'high', pile: 'high', hide: true },
+      ],
+      tip: tipOnce('chance', '抽到投資機會一定要選一邊：點發光的低風險或高風險牌堆就會翻牌。賠錢時如果現金不夠，會自動向錢莊貸款。'),
+    });
+    G.focus = deck;
+  }
+  let risk;
+  const insider = p.front.find((c) => c.id === 'insider');
+  if (insider) {
+    const a = draw(deck), b = draw(deck);
+    p.front = p.front.filter((c) => c !== insider);
+    if (b) {
+      G.stage = { ph: 2, caption: `${p.name} 用內線消息翻 2 張` };
+      render();
+      await Promise.all([fxDraw(`[data-pile="${deck}"]`, '#stage-slot', a, { back: deck }), fxDraw(`[data-pile="${deck}"]`, '#stage-slot-2', b, { back: deck })]);
+      G.stage = { cards: [a, b], caption: `${p.name} 用內線消息翻 2 張` };
+      render();
+    }
+    if (!b) risk = a;
+    else if (p.ai) risk = a.amount >= b.amount ? a : b;
+    else risk = await ask({ who: p, title: '內線消息：選一張', body: '另一張會放回牌堆底。', picks: [{ card: a, v: a, note: '選這張' }, { card: b, v: b, note: '選這張' }], opts: [{ label: `${a.name} ${signed(a.amount)}`, v: a }, { label: `${b.name} ${signed(b.amount)}`, v: b }] });
+    if (b) G.decks[deck].push(risk === a ? b : a);
+    log(`${p.name} 用了內線消息，從兩張裡選了「${risk.name}」。`);
+  } else {
+    risk = draw(deck);
+    G.stage = { ph: 1, caption: `${p.name} 翻開` };
+    render();
+    await fxDraw(`[data-pile="${deck}"]`, '#stage-slot', risk, { back: deck });
+  }
+  let { amt, notes } = investAmount(risk.amount, deck, G.sky.id, bless, frown);
+  p.marks.filter((m) => m.god === 'bless' || m.god === 'frown').forEach((m) => G.disc.event.push(m));
+  p.marks = p.marks.filter((m) => m.god !== 'bless' && m.god !== 'frown');
+  G.stage = { card: risk, caption: `${p.name} 翻開`, flip: true };
+  render();
+  const charm = p.front.find((c) => c.id === 'charm');
+  if (amt < 0 && charm) {
+    let use;
+    if (p.ai) use = amt <= -1000;
+    else use = await ask({ who: p, title: `要付 ${fmt(-amt)}，用平安符嗎？`, body: `翻到「${risk.name}」。平安符可以抵銷這次賠錢，用完就棄掉。`, opts: [{ label: '用平安符抵銷', v: true }, { label: '照付', v: false, ghost: true }] });
+    if (use) { p.front = p.front.filter((c) => c !== charm); notes.push('平安符抵銷'); amt = 0; SFX.play('block'); fxRing(p.i); }
+  }
+  let extra = '';
+  if (amt >= 0) p.cash += amt;
+  else {
+    const r = payForced(p, -amt);
+    if (r.loans) extra = ` 現金不夠，自動貸款 ${r.loans} 張。`;
+    if (r.bankrupt) extra += ' 破產了：付光現金，拿 2 張低落牌。';
+  }
+  if (amt > 0) { SFX.play('coin'); fxFloat(cashEl(p), `+${fmt(amt)}`, 'pos'); }
+  else if (amt < 0) { SFX.play('lose'); fxFloat(cashEl(p), `−${fmt(-amt)}`, 'neg'); fxShake(p.i); }
+  setLast(p, `${deck === 'low' ? '低' : '高'}風險：${risk.name}，${amt > 0 ? `+${fmt(amt)}` : amt < 0 ? `−${fmt(-amt)}` : '不賺不賠'}`);
+  G.disc[deck].push(risk);
+  const msg = `${p.name} 翻到「${risk.name}」${signed(risk.amount)}${notes.length ? `（${notes.join('、')}）` : ''}，${amt > 0 ? `拿到 ${fmt(amt)}` : amt < 0 ? `付出 ${fmt(-amt)}` : '不賺不賠'}。${extra}`;
+  log(msg); render();
+  await ackFor(p, { title: amt > 0 ? '投資賺錢了' : amt < 0 ? '投資賠錢了' : '不賺不賠', body: msg, cards: [risk] });
+}
+
+function investAmount(base, deck, skyId, bless, frown) {
+  let amt = base;
+  const notes = [];
+  if (deck === 'high' && skyId === 'wealthday' && base > 0) { amt += 1000; notes.push('財神壽誕 +1,000'); }
+  if (deck === 'high' && skyId === 'thunder' && base < 0) { amt -= 1000; notes.push('雷公發威 −1,000'); }
+  for (let k = 0; k < bless; k++) { amt += 2000; notes.push('財神眷顧 +2,000'); }
+  for (let k = 0; k < frown; k++) { amt -= 2000; notes.push('財神翻臉 −2,000'); }
+  return { amt, notes };
+}
+
+async function resolveGodDraw(p, card) {
+  card.drawnRound = G.round;
+  p.hand.push(card);
+  log(`${p.name} 抽到 1 張神明卡，收進手牌。`);
+  const secret = p.ai || humans() > 1;
+  setLast(p, secret ? '抽到神明卡（內容保密）' : `抽到神明卡「${card.name}」`);
+  if (!p.ai) tipOnce('god', '神明卡收進手牌，下一回合起在你的回合開始時可以打出，每回合最多 1 張。財神系跟錢有關，喜神系跟開心有關，天兵系用來搶奪與防守。');
+  if (!secret) toast(card.god === 'amulet' ? '有人對你打出神明卡時，會問你要不要用它擋下。' : '下一回合起，輪到你時可以打出。', { title: `抽到「${card.name}」` });
+  await say({ who: p, title: '抽到神明卡', body: secret ? '收進手牌，內容保密。' : `「${card.name}」收進手牌。`, cards: [secret ? { back: 'god' } : card] }, 1.1);
+  await fxAway('#stage-card', handEl(p), { fade: true, clear: () => { G.stage = null; render(); } });
+}
+
+async function humanGod(p, playable, pre) {
+  const card = pre || await ask({ who: p, title: '選一張神明卡', body: '點牌就能打出。', picks: playable.map((c) => ({ card: c, v: c, note: '打出' })), opts: [...playable.map((c) => ({ label: c.name, sub: c.text, v: c, ghost: true })), { label: '取消', v: null, ghost: true }] });
+  if (!card) return false;
+  const others = G.players.filter((q) => q !== p);
+  let target = null, asset = null;
+  if (card.target === 'other') {
+    target = await ask({ who: p, title: `「${card.name}」要對誰用？`, body: card.text, opts: [...others.map((q) => ({ label: `${q.name}（${q.role.name}）`, sub: `現金 ${showCashOf(q) ? money(q.cash) : '？'}．開心值 ${joyOf(q)}${q.marks.length ? `．面前有 ${q.marks.map((m) => m.name).join('、')}` : ''}`, v: q })), { label: '取消', v: null, ghost: true }] });
+    if (!target) return false;
+  } else if (card.target === 'asset') {
+    const cap = p.cash + (3 - p.loans) * 5000;
+    const cands = [];
+    others.forEach((q) => q.front.filter((c) => c.type === 'auction').forEach((c) => cands.push({ q, c, price: c.min + 2000 })));
+    if (!cands.length) { toast('其他玩家面前都還沒有拍賣牌，這張牌先留著。', { kind: 'bad' }); return false; }
+    const pick = await ask({ who: p, title: '天兵奪寶：搶哪一張？', body: '付給對方「底價 ＋ 2,000」，強制買下。', opts: [...cands.map((x) => ({ label: `${x.q.name}的${x.c.name} −${fmt(x.price)}`, sub: `${x.c.text}${x.price > p.cash ? ' 現金不夠，會自動貸款。' : ''}`, v: x, disabled: x.price > cap })), { label: '取消', v: null, ghost: true }] });
+    if (!pick) return false;
+    target = pick.q; asset = pick.c;
+  }
+  await applyGod(p, card, target, asset);
+  return true;
+}
+
+async function fxGodEffect(p, card, target, asset) {
+  const clear = () => { G.stage = null; render(); };
+  switch (card.god) {
+    case 'bless': SFX.play('joy'); await fxAway('#stage-card', frontEl(p), { clear }); fxFloat(panelEl(p.i), '下次投資 +2,000', 'pos'); break;
+    case 'frown': SFX.play('hit'); await fxAway('#stage-card', frontEl(target), { clear }); fxShake(target.i); fxFloat(panelEl(target.i), '下次投資 −2,000', 'neg'); break;
+    case 'prank': SFX.play('hit'); await fxAway('#stage-card', frontEl(target), { clear }); fxShake(target.i); fxFloat(panelEl(target.i), '被惡作劇了', 'neg'); break;
+    case 'tax': SFX.play('hit'); await fxDiscard('#stage-card', clear); fxShake(target.i); fxFloat(cashEl(target), '−2,000', 'neg'); await fxCoins(cashEl(target), $('#bank'), 3); break;
+    case 'sigh': SFX.play('sad'); await fxDiscard('#stage-card', clear); fxShake(target.i); fxFloat(joyEl(target), '☹☹ −2', 'low'); break;
+    case 'grace': SFX.play('joy'); await fxDiscard('#stage-card', clear); fxFloat(joyEl(p), '心情好轉', 'joy'); break;
+    case 'raid':
+      SFX.play('hit'); fxShake(target.i);
+      await fxAway(`[data-uid="${asset.uid}"]`, frontEl(p), {});
+      await fxDiscard('#stage-card', clear);
+      SFX.play('coins');
+      await fxCoins(cashEl(p), cashEl(target), 4);
+      break;
+    default: break;
+  }
+}
+
+async function applyGod(p, card, target, asset) {
+  p.hand = p.hand.filter((c) => c !== card);
+  const aimed = target && target !== p;
+  const caption = `${p.name} 打出${aimed ? ` → ${target.name}` : ''}`;
+  G.stage = { ph: 1, caption };
+  log(`${p.name} 打出「${card.name}」${target ? `，目標：${target.name}` : ''}。`);
+  setLast(p, `打出「${card.name}」${aimed ? ` → ${target.name}` : ''}`);
+  render();
+  await fxDraw(`[data-hand="${p.i}"]`, '#stage-slot', card, { back: 'god' });
+  SFX.play('magic');
+  G.stage = { card, caption, flip: true, glow: true };
+  render();
+  // Everyone gets a moment to read the card before it takes effect.
+  await say({ who: p, title: `${p.name} 打出「${card.name}」`, body: `${aimed ? `目標：${target.name}。` : ''}${card.text}`, cards: [card] }, p.ai ? 1.6 : 0.8);
+  if (target && target !== p && await tryDefend(target, card, p)) { G.disc.event.push(card); render(); return; }
+  let msg = '';
+  switch (card.god) {
+    case 'bless': p.marks.push(card); msg = `${p.name} 下一次投資翻到的金額 +2,000。`; break;
+    case 'frown': target.marks.push(card); msg = `${target.name} 下一次投資翻到的金額 −2,000。`; break;
+    case 'tax': {
+      const r = payForced(target, 2000);
+      msg = `${target.name} 付 2,000 給銀行${r.loans ? `（現金不夠，自動貸款 ${r.loans} 張）` : ''}。`;
+      G.disc.event.push(card); break;
+    }
+    case 'sigh': target.lows += 2; msg = `${target.name} 拿 2 張低落牌，開心值 −2。`; G.disc.event.push(card); break;
+    case 'prank': target.marks.push(card); msg = `${target.name} 下一次抽到娛樂牌時，一定要花錢享受。`; break;
+    case 'grace': { const k = Math.min(2, p.lows); p.lows -= k; msg = k ? `${p.name} 棄掉 ${k} 張低落牌。` : `${p.name} 面前沒有低落牌，這張牌沒有效果。`; G.disc.event.push(card); break; }
+    case 'raid': {
+      const price = asset.min + 2000;
+      const r = payForced(p, price);
+      target.cash += r.paid;
+      target.front = target.front.filter((c) => c !== asset);
+      p.front.push(asset);
+      msg = `${p.name} 付 ${fmt(r.paid)} 給 ${target.name}，搶走「${asset.name}」。`;
+      G.disc.event.push(card); break;
+    }
+  }
+  await fxGodEffect(p, card, target, asset);
+  if (aimed) setLast(target, card.god === 'raid' ? `被天兵奪寶搶走「${asset.name}」` : ({ frown: '被財神翻臉：下次投資 −2,000', tax: '被財神抽稅 −2,000', sigh: '被喜神嘆氣 ☹☹', prank: '被惡作劇：下次娛樂必享受' }[card.god] || `被「${card.name}」`));
+  toast(msg, { title: `${p.name} 打出「${card.name}」`, kind: aimed && !target.ai ? 'bad' : !p.ai ? 'good' : 'info', ttl: 6500 });
+  log(msg); render();
+  // When the computer hits a human, the message is shown from the human's side.
+  const viewer = p.ai && target && !target.ai ? target : p;
+  await ackFor(viewer, { title: viewer === p ? `「${card.name}」生效` : `${p.name} 對你打出「${card.name}」`, body: msg, cards: [card] });
+}
+
+async function tryDefend(t, card, from) {
+  const amulet = t.hand.find((c) => c.god === 'amulet');
+  const charm = t.front.find((c) => c.id === 'charm');
+  if (!amulet && !charm) return false;
+  let v;
+  if (t.ai) v = amulet ? 'amulet' : 'charm';
+  else {
+    const opts = [];
+    if (amulet) opts.push({ label: '用護身符擋下', v: 'amulet' });
+    if (charm) opts.push({ label: '用平安符擋下', sub: '平安符用完就棄掉。', v: 'charm' });
+    opts.push({ label: '不擋', v: 'none', ghost: true });
+    v = await ask({ who: t, title: `${from.name} 對你打出「${card.name}」`, body: card.text, cards: [card], opts });
+  }
+  if (v === 'none') return false;
+  if (v === 'amulet') { t.hand = t.hand.filter((c) => c !== amulet); G.disc.event.push(amulet); }
+  else t.front = t.front.filter((c) => c !== charm);
+  const msg = `${t.name} 用${v === 'amulet' ? '神明護身符' : '平安符'}擋下了「${card.name}」。`;
+  SFX.play('block');
+  fxRing(t.i);
+  setLast(t, `擋下「${card.name}」`);
+  setLast(from, `「${card.name}」被 ${t.name} 擋下`);
+  toast(msg, { title: '神明卡被擋下', kind: !t.ai ? 'good' : !from.ai ? 'bad' : 'info', ttl: 6000 });
+  log(msg); render();
+  await fxDiscard('#stage-card', () => { G.stage = null; render(); });
+  await ackFor(from, { title: '被擋下了', body: msg });
+  return true;
+}
+
+/* ================= auction ================= */
+async function phaseAuction() {
+  G.phase = 'auction'; G.stage = null; G.cur = -1; G.focus = 'auction';
+  if (!G.decks.auction.length) { log('拍賣牌用完了，本回合沒有拍賣。'); render(); return; }
+  render();
+  tipOnce('step-auction', GUIDE.auction[1], GUIDE.auction[0]);
+  const starter = G.players[G.start];
+  if (!starter.ai) await ask({ who: starter, title: '天庭拍賣會', body: '你是起始玩家，點發光的拍賣牌堆，翻開這次的拍賣品。', opts: [{ label: '翻開拍賣品', v: 1, pile: 'auction', hide: true }] });
+  const card = G.decks.auction.shift();
+  const order = G.players.map((_, k) => G.players[(G.start + k) % G.players.length]);
+  G.auction = { card, bids: {}, done: new Set(), shown: new Set(), result: null, flip: true, hidden: true };
+  log(`天庭拍賣會：「${card.name}」，底價 ${fmt(card.min)}。`);
+  render();
+  await fxDraw('[data-pile="auction"]', '#auc-slot', card, { back: 'auction' });
+  SFX.play('gavel');
+  G.auction.hidden = false;
+  render();
+  await ackGlobal({ title: `天庭拍賣會：${card.name}`, body: `底價 ${fmt(card.min)}，大家暗中出價、同時公開。`, cards: [card] });
+  const privacy = humans() > 1;
+  for (const p of order) {
+    if (p.ai) { G.auction.bids[p.i] = aiBid(p, card); G.auction.done.add(p.i); SFX.play('tick'); render(); await pause(D() * 0.35); }
+    else {
+      if (privacy) await handoff(p);
+      G.auction.bids[p.i] = await bidOverlay(p, card);
+      G.auction.done.add(p.i); render();
+    }
+  }
+  $('#ov-bid').hidden = true;
+  await say({ title: '一、二、三，開拳！', body: '所有人同時打開拳頭。' }, 0.6);
+  for (const p of order) { G.auction.shown.add(p.i); SFX.play('pop'); render(); await pause(D() * 0.45); }
+  const { res, msg } = settleAuction(card, order, G.auction.bids);
+  G.auction.result = res;
+  if (res.winner !== null) setLast(G.players[res.winner], `得標「${card.name}」−${fmt(G.auction.bids[res.winner])}`);
+  res.seconds.forEach((i) => { const pay = Math.floor(G.auction.bids[i] / 2 / 500) * 500; if (pay) setLast(G.players[i], `拍賣出價第二高，抽成 −${fmt(pay)}`); });
+  log(msg); render();
+  await fxAuctionResult(card, res);
+  await ackGlobal({ title: res.winner === null ? '流標' : '拍賣結果', body: msg });
+  G.auction = null;
+  render();
+}
+async function fxAuctionResult(card, res) {
+  const gone = () => { G.auction.gone = true; render(); };
+  if (res.winner === null) {
+    SFX.play('lose');
+    await fxDiscard('#auc-card', gone);
+    return;
+  }
+  const w = G.players[res.winner];
+  SFX.play('gavel');
+  if (!w.ai) toast(`你得標了「${card.name}」。`, { kind: 'good' });
+  res.seconds.forEach((i) => {
+    const q = G.players[i];
+    const pay = Math.floor(G.auction.bids[i] / 2 / 500) * 500;
+    if (pay) { SFX.play('stamp'); fxFloat(cashEl(q), `抽成 −${fmt(pay)}`, 'neg'); }
+    if (!q.ai && pay) toast(`出價第二高，被神明抽成 ${fmt(pay)}。`, { kind: 'bad' });
+  });
+  await fxAway('#auc-card', frontEl(w), { clear: gone });
+  fxFloat(panelEl(w.i), `得標「${card.name}」`, 'pos');
+}
+
+// Highest bid at or above the minimum wins and pays in full; the second-highest bid pays half,
+// rounded down to 500. A tie for the top bid, or no bid reaching the minimum, voids the lot.
+function settleAuction(card, order, bids) {
+  const entries = order.map((p) => ({ p, b: bids[p.i] || 0 })).filter((e) => e.b > 0).sort((a, b) => b.b - a.b);
+  const res = { winner: null, seconds: [], void: null };
+  let msg;
+  if (!entries.length || entries[0].b < card.min) {
+    res.void = 'min';
+    msg = `沒有人出到底價 ${fmt(card.min)}，流標。大家拿回自己的錢。`;
+  } else if (entries[1] && entries[1].b === entries[0].b) {
+    res.void = 'tie';
+    msg = `最高價 ${fmt(entries[0].b)} 平手，天庭誰也不給，流標。大家拿回自己的錢。`;
+  } else {
+    const w = entries[0];
+    w.p.cash -= w.b; w.p.front.push(card); res.winner = w.p.i;
+    msg = `${w.p.name} 出價 ${fmt(w.b)} 得標，拿走「${card.name}」。`;
+    if (entries[1]) {
+      const sb = entries[1].b;
+      const pay = Math.floor(sb / 2 / 500) * 500;
+      entries.filter((e) => e.b === sb).forEach((e) => { e.p.cash -= pay; res.seconds.push(e.p.i); msg += `${e.p.name} 出價第二高（${fmt(sb)}），被神明抽成 ${fmt(pay)}。`; });
+    }
+  }
+  return { res, msg };
+}
+
+function handoff(p) {
+  const run = RUN;
+  return new Promise((res, rej) => {
+    pending = { res, rej };
+    const ov = $('#ov-bid');
+    ov.hidden = false;
+    ov.innerHTML = `<div class="sheet handoff" style="--pc:${p.color}"><div class="bigdot"></div><h2>請把電腦交給 ${p.name}</h2><p class="dim">拍賣要暗中出價，其他人請先別看螢幕。</p><button type="button" class="opt" id="handoff-ok">我是 ${p.name}，開始出價</button></div>`;
+    const b = $('#handoff-ok');
+    b.onclick = () => { if (run !== RUN || !pending) return; pending = null; b.disabled = true; res(); };
+    b.focus();
+  });
+}
+
+function bidOverlay(p, card) {
+  const run = RUN;
+  return new Promise((res, rej) => {
+    pending = { res, rej };
+    const ov = $('#ov-bid');
+    ov.hidden = false;
+    let fist = [];
+    let fresh = -1;
+    const total = () => fist.reduce((a, b) => a + b, 0);
+    const compose = (amt) => { const out = []; for (const v of [5000, 1000, 500]) while (amt >= v) { out.push(v); amt -= v; } return out; };
+    const paint = () => {
+      const bid = total();
+      const hint = bid === 0 ? '握空拳：這次不出價，不用付任何錢。'
+        : bid < card.min ? `低於底價 ${fmt(card.min)}，不會得標；但如果剛好是第二高，還是要付一半。`
+        : `出價最高就得標，付 ${fmt(bid)}；如果是第二高，要付 ${fmt(Math.floor(bid / 2 / 500) * 500)}。`;
+      ov.innerHTML = `<div class="sheet bidsheet" style="--pc:${p.color}">
+        <div class="who"><span class="dot"></span>${p.name} 的出價（其他人看不到）</div>
+        <div class="bidgrid">${cardHTML(card, { tilt: true })}
+          <div class="bidctl">
+            <div><div class="k">你的現金</div><div class="bigmoney">${money(p.cash)}</div></div>
+            <div><div class="k">點鈔票放進拳頭</div>
+              <div class="bills">${[500, 1000, 5000].map((v) => `<button type="button" class="bill b${v}" data-a="${v}" ${bid + v > p.cash ? 'disabled' : ''} aria-label="放進 ${fmt(v)}">${fmt(v)}</button>`).join('')}</div>
+            </div>
+            <div><div class="k">拳頭裡的錢（點鈔票可以拿回來）</div>
+              <div class="fist">${fist.length ? fist.map((v, k) => `<button type="button" class="bill b${v} ${k === fresh ? 'new' : ''}" data-rm="${k}" aria-label="拿回 ${fmt(v)}">${fmt(v)}</button>`).join('') : '<span class="empty">空拳</span>'}</div>
+              <output id="bid-out" class="bidnum">${money(bid)}</output>
+            </div>
+            <div class="quick"><button type="button" data-q="0">空拳</button><button type="button" data-q="min">底價 ${fmt(card.min)}</button><button type="button" data-q="all">全部現金</button></div>
+            <p class="hint">${hint}</p>
+            ${p.loans < 3 ? `<button type="button" class="opt ghost" id="bid-loan">先貸款 +5,000<small>目前 ${p.loans}/3 張，結算時每張扣 6,000</small></button>` : ''}
+            <button type="button" class="opt" id="bid-ok">握緊拳頭，確定出價</button>
+          </div>
+        </div></div>`;
+      fresh = -1;
+      ov.querySelectorAll('[data-a]').forEach((b) => {
+        b.onclick = () => {
+          const v = +b.dataset.a;
+          if (total() + v > p.cash) return;
+          fist.push(v);
+          fist.sort((x, y) => y - x);
+          fresh = fist.lastIndexOf(v);
+          SFX.play('coin');
+          paint();
+        };
+      });
+      ov.querySelectorAll('[data-rm]').forEach((b) => { b.onclick = () => { fist.splice(+b.dataset.rm, 1); paint(); }; });
+      ov.querySelectorAll('[data-q]').forEach((b) => {
+        b.onclick = () => {
+          const q = b.dataset.q;
+          const amt = q === 'all' ? p.cash : q === 'min' ? Math.min(card.min, p.cash) : 0;
+          fist = compose(Math.floor(amt / 500) * 500);
+          if (amt) SFX.play('coins');
+          paint();
+        };
+      });
+      const loan = $('#bid-loan');
+      if (loan) loan.onclick = () => { takeLoan(p); render(); paint(); };
+      $('#bid-ok').onclick = () => {
+        if (run !== RUN || !pending) return;
+        pending = null;
+        const bid = total();
+        log(`${p.name} 握緊了拳頭。`);
+        SFX.play('pop');
+        if (humans() > 1) ov.innerHTML = '<div class="sheet handoff"><h2>已收到出價</h2><p class="dim">請把電腦交給下一位。</p></div>';
+        else ov.hidden = true;
+        res(bid);
+      };
+    };
+    paint();
+  });
+}
+
+async function phaseRoundEnd() {
+  G.phase = 'roundEnd';
+  G.focus = null;
+  if (G.round < 6) {
+    const old = G.start;
+    G.start = (G.start + 1) % G.players.length;
+    log(`第 ${G.round} 回合結束，起始玩家牌交給 ${G.players[G.start].name}。`);
+    renderTop();
+    await fxToken(old, G.start);
+    render();
+    await say({ title: `第 ${G.round} 回合結束`, body: `起始玩家牌交給 ${G.players[G.start].name}。` }, 1.0);
+  } else {
+    render();
+    await say({ title: '第 6 回合結束', body: '賭局揭曉，進入結算。' }, 1.2);
+  }
+}
+
+/* ================= AI ================= */
+function estValue(p, c) {
+  const left = 6 - G.round;
+  if (c.rent) return c.value + c.rent * left;
+  if (c.value) return c.value;
+  if (c.dice) return 5000;
+  if (c.joy) return c.joy * JOY_VALUE;
+  if (c.id === 'insider') return 1500;
+  if (c.id === 'charm') return 1800;
+  return 0;
+}
+function aiFun(p, card, cost) {
+  if (p.cash < cost) return false;
+  // Enjoy when the happiness is worth at least what it costs, counting the low card a refusal would bring.
+  const enjoy = card.joy * JOY_VALUE - cost;
+  const refuse = hasPet(p) ? 0 : -JOY_VALUE;
+  return enjoy >= refuse;
+}
+function aiRisk(p) {
+  if (p.marks.some((m) => m.god === 'frown')) return 'low';
+  if (p.marks.some((m) => m.god === 'bless')) return 'high';
+  // High risk pays more on average; take it when the worst loss would not force a loan.
+  return p.cash >= 6000 ? 'high' : 'low';
+}
+function aiBid(p, c) {
+  const v = estValue(p, c);
+  const budget = Math.floor(Math.max(0, p.cash - 1000) / 500) * 500;
+  // Sometimes pass, so fewer computers crowd the same auction.
+  let interest = 0.8;
+  if (c.id === 'insider' || c.id === 'charm') interest = 0.55;
+  if (Math.random() > interest) return 0;
+  // Each computer bids in its own style (p.aggr), which keeps their bids apart.
+  let bid = Math.round((v * p.aggr * (0.85 + Math.random() * 0.25)) / 500) * 500;
+  if (bid < c.min && v >= c.min * 1.2 && Math.random() < 0.5) bid = c.min + 500 * Math.floor(Math.random() * 3);
+  bid = Math.min(bid, budget);
+  return bid >= c.min ? bid : 0;
+}
+async function aiGod(p) {
+  const playable = p.hand.filter((c) => c.god !== 'amulet' && c.drawnRound < G.round);
+  if (!playable.length || Math.random() < 0.2) return;
+  const others = G.players.filter((q) => q !== p);
+  // Aim at whoever is ahead on total score; happiness attacks go to the happiest player.
+  const leader = others.map((q) => ({ q, t: scores(q).total })).sort((a, b) => b.t - a.t)[0].q;
+  const joyLeader = others.slice().sort((a, b) => joyOf(b) - joyOf(a))[0];
+  let best = null;
+  const consider = (card, util, target = null, asset = null) => { if (util > 0 && (!best || util > best.util)) best = { card, util, target, asset }; };
+  for (const c of playable) {
+    switch (c.god) {
+      case 'bless': consider(c, p.marks.some((m) => m.god === 'bless') ? 0 : 3); break;
+      case 'frown': consider(c, 3, leader); break;
+      case 'tax': consider(c, 3.2, leader); break;
+      case 'sigh': consider(c, 4, joyLeader); break;
+      case 'prank': consider(c, 1.5, leader); break;
+      case 'grace': consider(c, Math.min(2, p.lows) * 2.5); break;
+      case 'raid':
+        others.forEach((q) => q.front.filter((a) => a.type === 'auction').forEach((a) => {
+          const price = a.min + 2000;
+          if (price <= p.cash - 1000) consider(c, (estValue(p, a) - price) / 1000 + 1, q, a);
+        }));
+        break;
+    }
+  }
+  if (!best) return;
+  if (!best.target && best.card.target === 'other') best.target = leader;
+  await applyGod(p, best.card, best.target, best.asset);
+}
+
+/* ================= end ================= */
+async function finish() {
+  G.phase = 'end'; G.cur = -1; G.stage = null; G.focus = null;
+  const lines = [];
+  G.diceFlips = [];
+  G.players.forEach((p) => p.front.filter((c) => c.dice).forEach((c) => {
+    const h = draw('high');
+    c.diceValue = Math.max(0, 4000 + (h ? h.amount : 0));
+    const t = `${p.name} 的財神的骰子翻出「${h ? h.name : '—'}」${h ? signed(h.amount) : ''}，價值 ${fmt(c.diceValue)}。`;
+    lines.push(t); log(t);
+    if (h) G.diceFlips.push({ p, h, value: c.diceValue });
+  }));
+  render();
+  renderAction({ title: '賭局揭曉', body: '結算結果已經公布。' });
+  showEnd(lines);
+}
+
+function showEnd(lines) {
+  const rows = G.players.map((p) => ({ p, s: scores(p) }));
+  // Highest total wins; a tie goes to the happier player, and a full tie is shared.
+  rows.sort((a, b) => b.s.total - a.s.total || b.s.j - a.s.j);
+  let rank = 0, prev = null;
+  rows.forEach((r, i) => { const k = `${r.s.total},${r.s.j}`; if (k !== prev) { rank = i + 1; prev = k; } r.rank = rank; });
+  const winners = rows.filter((r) => r.rank === 1);
+  const moneySide = rows.filter((r) => r.s.w > r.s.jv).length;
+  const joySide = rows.filter((r) => r.s.jv > r.s.w).length;
+  const epi = (moneySide > joySide ? '大部分凡人的分數主要來自錢。財神得意地說：「你看吧。」'
+    : joySide > moneySide ? '大部分凡人的分數主要來自快樂。這次換喜神笑了出來。'
+    : '靠錢和靠快樂得分的人一樣多，兩位神明誰也說服不了誰。')
+    + '<br>玉皇大帝最後宣布：快樂也有價，錢和快樂加起來，才是一個人的這一年。兩位神明，其實都只說對了一半。';
+  const dice = (G.diceFlips || []).map((d) => `<div class="dicecell">${cardHTML(d.h, { size: 'sm', flip: true })}<span>${d.p.name} 的財神的骰子<br><b>價值 ${fmt(d.value)}</b></span></div>`).join('');
+  $('#end-body').innerHTML = `
+    <div class="winner"><div class="k">賭局揭曉</div><h2>${winners.map((w) => w.p.name).join('、')} 獲勝！</h2>
+      <p class="dim">${winners.length > 1 ? '總分和開心值都相同，一起獲勝。' : `${winners[0].p.role.name}，總分 ${money(winners[0].s.total)}。`}</p></div>
+    ${dice ? `<div class="dicerow">${dice}</div>` : ''}
+    <div class="tblwrap"><table class="rtbl">
+      <thead><tr><th>名次</th><th>玩家</th><th class="r">現金</th><th class="r">拍賣牌價值</th><th class="r">貸款</th><th>開心值</th><th class="r">開心換算</th><th class="r">總分</th></tr></thead>
+      <tbody>${rows.map((r) => {
+        const p = r.p;
+        const joyCards = p.front.reduce((s, c) => s + (c.joy || 0), 0);
+        return `<tr class="${r.rank === 1 ? 'win' : ''}"><td>${r.rank}</td><td class="nm">${p.name}<span class="dim">（${p.role.name}）</span></td><td class="r">${fmt(p.cash)}</td><td class="r">${fmt(r.s.assets)}</td><td class="r">${p.loans ? `−${fmt(p.loans * 6000)}` : '0'}</td><td>${r.s.j}<span class="dim small">（${p.role.joy} ＋ ${joyCards} − ${p.lows}）</span></td><td class="r">${fmt(r.s.jv)}</td><td class="r"><b>${money(r.s.total)}</b></td></tr>`;
+      }).join('')}</tbody></table></div>
+    <p class="dim small">總分 ＝ 現金 ＋ 拍賣牌價值 − 貸款 ＋ 開心值 × 1,000。開心值 ＝ 初始開心值 ＋ 面前的 ☺ − 低落牌，最低 0。平手時開心值高的人獲勝。</p>
+    <div class="epi">${epi}</div>
+    <div class="row-btns"><button type="button" class="opt" id="end-again">再玩一次</button><button type="button" class="opt ghost" id="end-setup">更改設定</button><button type="button" class="opt ghost" id="end-close">看看桌面</button></div>`;
+  $('#ov-end').hidden = false;
+  SFX.play('fanfare');
+  fxConfetti();
+  $('#end-again').onclick = () => { $('#ov-end').hidden = true; startNew(); };
+  $('#end-setup').onclick = () => { $('#ov-end').hidden = true; openSetup(); };
+  $('#end-close').onclick = () => { $('#ov-end').hidden = true; renderAction({ title: '遊戲結束', body: '想再玩一次，按右上角的「新遊戲」。', opts: [{ label: '再看一次結算', v: 1 }] }, () => { $('#ov-end').hidden = false; }); };
+}
+
+/* ================= setup, roles, rules ================= */
+function openSetup() {
+  renderSetup();
+  $('#ov-title').hidden = true;
+  $('#ov-setup').hidden = false;
+  $('#setup-cancel').textContent = G && G.round > 0 && G.phase !== 'end' ? '返回遊戲' : '返回';
+}
+function renderSetup() {
+  const seats = CFG.seats.slice(0, CFG.n);
+  $('#setup-body').innerHTML = `
+    <fieldset class="field"><legend>人數</legend>
+      <div class="seg" role="group" aria-label="玩家人數">${[2, 3, 4, 5].map((k) => `<button type="button" data-n="${k}" class="${CFG.n === k ? 'on' : ''}">${k} 人</button>`).join('')}</div>
+      <p class="dim small">正式規則是 4–5 人，也可以用 2–3 人試玩。</p>
+    </fieldset>
+    <fieldset class="field"><legend>座位</legend>
+      <div class="seatrows">${seats.map((s, i) => `<div class="seatrow" style="--pc:var(--seat-${i + 1})"><span class="dot"></span><input id="seat-name-${i}" value="${clean(s.name)}" maxlength="8" aria-label="第 ${i + 1} 位玩家的名字"><div class="seg sm" role="group" aria-label="第 ${i + 1} 位由誰操作"><button type="button" data-seat="${i}" data-ai="0" class="${!s.ai ? 'on' : ''}">真人</button><button type="button" data-seat="${i}" data-ai="1" class="${s.ai ? 'on' : ''}">電腦</button></div></div>`).join('')}</div>
+      <p class="dim small">真人座位輪流用同一台電腦。兩位以上真人時，出價前會先出現遮蔽畫面。</p>
+    </fieldset>
+    <fieldset class="field"><legend>選項</legend>
+      <label class="chk"><input type="checkbox" id="opt-tips" ${CFG.tips ? 'checked' : ''}> <span>新手提示：第一次遇到的步驟和牌，跳出簡短說明</span></label>
+      <label class="chk"><input type="checkbox" id="opt-music" ${BGM.on ? 'checked' : ''}> <span>背景音樂</span></label>
+      <label class="chk"><input type="checkbox" id="opt-sound" ${SFX.muted ? '' : 'checked'}> <span>音效</span></label>
+      <div class="optrow"><span>節奏</span><div class="seg sm" role="group" aria-label="遊戲節奏">${[['slow', '慢'], ['normal', '普通'], ['fast', '快']].map(([k, l]) => `<button type="button" data-speed="${k}" class="${CFG.speed === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>
+    </fieldset>`;
+}
+function readSetupNames() {
+  CFG.seats.slice(0, CFG.n).forEach((s, i) => { const el = document.getElementById(`seat-name-${i}`); if (el) s.name = clean(el.value) || DEFAULT_NAMES[i]; });
+}
+$('#setup-body').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  readSetupNames();
+  if (b.dataset.n) CFG.n = +b.dataset.n;
+  if (b.dataset.seat !== undefined) CFG.seats[+b.dataset.seat].ai = b.dataset.ai === '1';
+  if (b.dataset.speed) { CFG.speed = b.dataset.speed; syncSpeedBtn(); }
+  renderSetup();
+});
+$('#setup-body').addEventListener('change', (e) => {
+  if (e.target.id === 'opt-tips') CFG.tips = e.target.checked;
+  if (e.target.id === 'opt-cash') CFG.openCash = e.target.checked;
+  if (e.target.id === 'opt-sound') { SFX.setMuted(!e.target.checked); syncSoundBtn(); }
+  if (e.target.id === 'opt-music') { BGM.setOn(e.target.checked); syncMusicBtn(); }
+  if (G) render();
+});
+$('#setup-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  readSetupNames();
+  saveCfg();
+  $('#ov-setup').hidden = true;
+  startNew();
+});
+$('#setup-cancel').addEventListener('click', () => {
+  readSetupNames(); saveCfg();
+  $('#ov-setup').hidden = true;
+  if (!G || G.round === 0) $('#ov-title').hidden = false;
+});
+
+function startNew() {
+  newGame();
+  PAUSED = false;
+  syncPauseBtn();
+  $('#ov-bid').hidden = true;
+  $('#ov-end').hidden = true;
+  $('#toasts').innerHTML = '';
+  render();
+  renderAction({ title: '抽身分牌', body: '每位玩家抽到一張身分牌。' });
+  showRoles();
+}
+function showRoles() {
+  $('#roles-body').innerHTML = G.players.map((p, k) => {
+    const r = p.role, s = scores(p);
+    return `<div class="rolecard" style="--pc:${p.color}; --k:${k}"><div class="who"><span class="dot"></span>${p.name}${p.ai ? '（電腦）' : ''}</div><div class="rname">${r.name}</div>
+      <dl><div><dt>初始金額</dt><dd>${fmt(r.cash)}</dd></div><div><dt>開心值</dt><dd>${r.joy}</dd></div><div><dt>每回合收入</dt><dd>${fmt(r.income)}</dd></div></dl>
+      <p>${r.desc}</p><p class="hint">起始總分 ${money(s.total)}</p><p>錢和資產 ${fmt(s.w)} ＋ 開心 ${s.j} × 1,000</p></div>`;
+  }).join('');
+  $('#roles-start-note').textContent = `起始玩家：${G.players[G.start].name}。實體版由「最近一次花錢買快樂的人」先開始，這裡隨機決定。`;
+  $('#ov-roles').hidden = false;
+  SFX.play('shuffle');
+  $('#roles-go').focus();
+}
+$('#roles-go').addEventListener('click', () => { $('#ov-roles').hidden = true; runGame(); });
+
+/* rules */
+const funRows = () => FUN_DEF.map(([n, j, c, k, pet]) => `<tr><td class="nm">${n}${pet ? ' ✿' : ''}</td><td class="joy">${joyStr(j)}</td><td class="r neg">−${fmt(c)}</td><td class="r">${k}</td></tr>`).join('');
+const riskRows = (def) => def.map(([n, a, k]) => `<tr><td class="nm">${n}</td><td class="r ${a >= 0 ? 'pos' : 'neg'}">${signed(a)}</td><td class="r">${k}</td></tr>`).join('');
+const RULES = [
+  ['story', '故事', () => `<div class="rules-sec"><h3>背景故事</h3>
+    <p>天庭裡的財神和喜神已經吵了一千年。財神說：「凡人要快樂很簡單，給他錢就好。」喜神說：「錢買得到熱鬧，買不到開心。」</p>
+    <p>玉皇大帝聽煩了，要兩位神明從人間挑出五個凡人打賭：靠打工過日子的學生、忙到沒空休假的醫生、每天擠捷運的上班族、等著收租的房東，還有作息規律的軍人。</p>
+    <p>接下來的一年，財神會丟給他們發財的機會，喜神會在他們面前擺滿誘惑。每到月底，天庭還會開一場拍賣會，把人間最搶手的房子、旅行和好運拿出來賣。神明賭上了面子，偶爾也會忍不住出手，幫自己看好的人一把，或是絆別人一跤。</p>
+    <h3>遊戲目標</h3>
+    <p>6 個回合裡，同時累積<b>金錢</b>和<b>開心值</b>。遊戲結束時，開心值每 1 點換成 1,000 元，和金錢加總，<b>總分</b>最高的人獲勝。</p>
+    <div class="tblwrap"><table class="rtbl"><thead><tr><th>身分</th><th class="r">初始金額</th><th class="r">開心值</th><th class="r">每回合收入</th><th>特色</th></tr></thead><tbody>${ROLES.map((r) => `<tr><td class="nm">${r.name}</td><td class="r">${fmt(r.cash)}</td><td class="r">${r.joy}</td><td class="r">${fmt(r.income)}</td><td>${r.desc}</td></tr>`).join('')}</tbody></table></div></div>`],
+  ['flow', '回合流程', () => `<div class="rules-sec"><h3>每回合 5 個步驟，共 6 回合</h3><ol>${STEPS.map(([k]) => `<li><b>${GUIDE[k][0].split('：')[1]}：</b>${GUIDE[k][1]}</li>`).join('')}</ol>
+    <h3>輪到你的時候</h3><ul><li>可以先打出 1 張神明卡。抽到的那一回合不能用，神明護身符只能在別人對你出牌時使用。</li><li>接著<b>一定要</b>抽 1 張事件牌並執行。</li><li>隨時可以向天庭錢莊貸款：拿 5,000，結算時每張扣 6,000，每人最多 3 張。也可以付 6,000 提前還掉 1 張。</li></ul></div>`],
+  ['event', '事件牌', () => `<div class="rules-sec"><h3>娛樂牌（14 張）：喜神的誘惑</h3><p>可以選擇<b>享受</b>：付錢，把牌放在面前，拿到牌上的 ☺；或是<b>忍住不花</b>：棄掉這張牌，拿 1 張低落牌（開心值 −1）。錢不夠時只能忍住，或先貸款。✿ 寵物牌：面前有小狗或小貓時，忍住不花不用拿低落牌。</p>
+    <div class="tblwrap"><table class="rtbl"><thead><tr><th>娛樂牌</th><th>開心值</th><th class="r">花費</th><th class="r">張數</th></tr></thead><tbody>${funRows()}</tbody></table></div>
+    <h3>投資機會（10 張）：財神的考驗</h3><p>選擇低風險或高風險牌堆，翻開一張，照金額收付。一定要選一邊，不能放棄。10 張的效果都一樣，只有名字不同：${CHANCE_NAMES.join('、')}。</p>
+    <h3>神明卡（10 張）</h3><p>收進手牌，不讓別人看。下一回合起，在自己的回合開始時可以打出，每回合最多 1 張。效果見「神明卡」分頁。</p></div>`],
+  ['invest', '投資與貸款', () => `<div class="rules-sec"><h3>低風險：存錢、理財</h3><p>12 張裡有 3 張賠錢，平均每張約 +750。</p><div class="tblwrap"><table class="rtbl"><thead><tr><th>牌名</th><th class="r">金額</th><th class="r">張數</th></tr></thead><tbody>${riskRows(LOW_DEF)}</tbody></table></div>
+    <h3>高風險：股票、房產、創業、刮刮樂</h3><p>12 張裡有 6 張賠錢，平均每張約 +1,300。</p><div class="tblwrap"><table class="rtbl"><thead><tr><th>牌名</th><th class="r">金額</th><th class="r">張數</th></tr></thead><tbody>${riskRows(HIGH_DEF)}</tbody></table></div>
+    <h3>天庭錢莊（貸款）</h3><ul><li>隨時可以貸款：拿 5,000，每人最多 3 張。</li><li>付不出錢時一定要貸款，錢不能變成負的。</li><li>結算時每張沒還的貸款扣 6,000，也可以在自己的回合付 6,000 提前還。</li><li>已經有 3 張還是付不出來：付光現金，剩下的不用付，但拿 2 張低落牌。</li></ul></div>`],
+  ['auction', '拍賣會', () => `<div class="rules-sec"><h3>天庭拍賣會（暗標）</h3><ol><li>翻開 1 張拍賣牌，所有人都看得到底價和效果。</li><li>每人把要出的錢握在拳頭裡，不想出價就握空拳。</li><li>同時打開。出價最高、而且達到底價的人得標，付全額，拿走這張牌。</li><li>出價第二高的人要付自己出價的一半給銀行，以 500 為單位捨去。其他人拿回錢。</li><li>最高價平手，或沒人達到底價：流標，大家拿回錢。</li></ol>
+    <div class="tblwrap"><table class="rtbl"><thead><tr><th>拍賣牌</th><th class="r">底價</th><th>效果</th><th class="r">張數</th></tr></thead><tbody>${AUCTION_DEF.map((a) => `<tr><td class="nm">${a.name}</td><td class="r">${fmt(a.min)}</td><td>${a.joy ? `<span class="joy">${joyStr(a.joy)}</span> ` : ''}${a.text}</td><td class="r">${a.n}</td></tr>`).join('')}</tbody></table></div><p class="dim small">每場用到 6 張。房東開局會先拿走 1 張人間套房。</p></div>`],
+  ['god', '神明卡', () => `<div class="rules-sec"><h3>神明卡（10 張）</h3><div class="tblwrap"><table class="rtbl"><thead><tr><th>神明卡</th><th>系列</th><th>效果</th><th class="r">張數</th></tr></thead><tbody>${GOD_DEF.map((g) => `<tr><td class="nm">${g.name}</td><td>${g.family}</td><td>${g.text}</td><td class="r">${g.n}</td></tr>`).join('')}</tbody></table></div>
+    <p>「財神眷顧」「財神翻臉」「喜神惡作劇」會放在目標玩家面前，生效一次後棄掉。平安符也能擋下一張對你打出的神明卡。</p></div>`],
+  ['sky', '天象', () => `<div class="rules-sec"><h3>天象牌（8 張，每場用 6 張）</h3><div class="tblwrap"><table class="rtbl"><thead><tr><th>天象</th><th>本回合的效果</th></tr></thead><tbody>${SKY_DEF.map((s) => `<tr><td class="nm">${s.name}</td><td>${s.text}</td></tr>`).join('')}</tbody></table></div></div>`],
+  ['score', '計分', () => `<div class="rules-sec"><h3>賭局揭曉</h3><p>第 6 回合的拍賣會結束後，先翻開「財神的骰子」算出價值，再計算兩項分數：</p>
+    <div class="formula"><div><b>金錢</b>現金 ＋ 拍賣牌的結算價值 − 每張貸款 6,000</div><div><b>開心換算</b>開心值 × 1,000。開心值 ＝ 身分牌的初始開心值 ＋ 面前所有 ☺ − 低落牌張數，最低 0</div><div><b>總分</b>兩項相加</div></div>
+    <p>總分最高的人獲勝。平手時開心值高的人獲勝；再平手就一起獲勝。</p>
+    <p>最後看看所有人：分數主要來自錢的人多，財神贏了面子；主要來自快樂的人多，換喜神得意。</p></div>`],
+];
+let rulesTab = 'story';
+function renderRules() {
+  $('#rules-tabs').innerHTML = RULES.map(([k, l]) => `<button type="button" data-tab="${k}" class="${rulesTab === k ? 'on' : ''}">${l}</button>`).join('');
+  $('#rules-body').innerHTML = RULES.find((r) => r[0] === rulesTab)[2]();
+}
+function openRules(tab) { if (tab) rulesTab = tab; renderRules(); $('#ov-rules').hidden = false; $('#rules-close').focus(); }
+$('#rules-tabs').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) { rulesTab = b.dataset.tab; renderRules(); } });
+$('#rules-close').addEventListener('click', () => { $('#ov-rules').hidden = true; });
+$('#ov-rules').addEventListener('click', (e) => { if (e.target.id === 'ov-rules') $('#ov-rules').hidden = true; });
+
+/* ================= top bar, drawer, table interactions ================= */
+function syncSpeedBtn() { $('#btn-speed').textContent = `節奏 ${SPEED_LABEL[CFG.speed] || '普通'}`; }
+function syncPauseBtn() {
+  const b = $('#btn-pause');
+  b.classList.toggle('paused', PAUSED);
+  b.setAttribute('aria-pressed', String(PAUSED));
+  b.title = PAUSED ? '繼續' : '暫停';
+  b.setAttribute('aria-label', PAUSED ? '繼續' : '暫停');
+}
+function syncMusicBtn() {
+  const b = $('#btn-music');
+  b.classList.toggle('muted', !BGM.on);
+  b.setAttribute('aria-pressed', String(BGM.on));
+  b.title = BGM.on ? '背景音樂：開' : '背景音樂：關';
+}
+function syncSoundBtn() {
+  const b = $('#btn-sound');
+  b.classList.toggle('muted', SFX.muted);
+  b.setAttribute('aria-pressed', String(!SFX.muted));
+  b.title = SFX.muted ? '音效：關' : '音效：開';
+}
+function toggleDrawer(open) {
+  const d = $('#drawer');
+  d.hidden = open === undefined ? !d.hidden : !open;
+  $('#btn-log').setAttribute('aria-expanded', String(!d.hidden));
+}
+$('#btn-rules').addEventListener('click', () => openRules(G && G.phase === 'auction' ? 'auction' : null));
+$('#btn-new').addEventListener('click', openSetup);
+$('#btn-log').addEventListener('click', () => toggleDrawer());
+$('#drawer-close').addEventListener('click', () => toggleDrawer(false));
+$('#btn-sound').addEventListener('click', () => { SFX.setMuted(!SFX.muted); syncSoundBtn(); SFX.play('coin'); });
+$('#btn-music').addEventListener('click', () => { BGM.setOn(!BGM.on); syncMusicBtn(); });
+$('#btn-speed').addEventListener('click', () => {
+  const order = ['slow', 'normal', 'fast'];
+  CFG.speed = order[(order.indexOf(CFG.speed) + 1) % order.length];
+  saveCfg();
+  syncSpeedBtn();
+  toast(`電腦玩家的節奏改成「${SPEED_LABEL[CFG.speed]}」。`, { ttl: 2500 });
+});
+$('#btn-pause').addEventListener('click', () => {
+  PAUSED = !PAUSED;
+  syncPauseBtn();
+  toast(PAUSED ? '已暫停：電腦玩家會停在下一步。再按一次繼續。' : '繼續遊戲。', { ttl: 3000 });
+});
+$('#btn-step').addEventListener('click', () => {
+  const g = G && GUIDE[G.phase];
+  if (g) toast(g[1], { kind: 'tip', title: g[0], ttl: 8000 });
+  else toast('按「開始遊戲」設定玩家。遊戲共 6 回合，每回合依序是天象、發薪、行動、拍賣、結束。', { kind: 'tip', title: '怎麼開始', ttl: 8000 });
+});
+$('#title-start').addEventListener('click', openSetup);
+$('#title-rules').addEventListener('click', () => openRules('story'));
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (!$('#ov-rules').hidden) $('#ov-rules').hidden = true;
+  else if (!$('#drawer').hidden) toggleDrawer(false);
+});
+// Clicking a glowing pile answers the current question.
+$('#board').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-pile]');
+  if (!b || !PICK || !Object.prototype.hasOwnProperty.call(PICK.map, b.dataset.pile)) return;
+  PICK.finish(PICK.map[b.dataset.pile]);
+});
+// Cards lean toward the pointer.
+document.addEventListener('pointermove', (e) => {
+  const el = e.target.closest && e.target.closest('.tilt');
+  if (!el || !FX.motion()) return;
+  const r = el.getBoundingClientRect();
+  const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+  el.style.setProperty('--ry', `${((x - 0.5) * 14).toFixed(1)}deg`);
+  el.style.setProperty('--rx', `${((0.5 - y) * 12).toFixed(1)}deg`);
+  el.style.setProperty('--mx', `${(x * 100).toFixed(0)}%`);
+  el.style.setProperty('--my', `${(y * 100).toFixed(0)}%`);
+}, { passive: true });
+// Hovering a small card in front of a player shows it full size.
+function findCard(uid) {
+  if (!G) return null;
+  for (const p of G.players) { const c = p.front.find((x) => x.uid === uid) || p.marks.find((x) => x.uid === uid); if (c) return c; }
+  return null;
+}
+let peekTimer = 0;
+function showPeek(m) {
+  const peek = $('#peek');
+  const card = m && findCard(+m.dataset.uid);
+  if (!card) { peek.hidden = true; return; }
+  peek.innerHTML = cardHTML(card);
+  const r = m.getBoundingClientRect();
+  const below = r.top < 230;
+  peek.classList.toggle('below', below);
+  peek.style.left = `${Math.min(Math.max(r.left + r.width / 2, 90), innerWidth - 90)}px`;
+  peek.style.top = `${below ? r.bottom : r.top}px`;
+  peek.hidden = false;
+}
+document.addEventListener('pointerover', (e) => {
+  if (e.pointerType === 'touch') return;
+  const m = e.target.closest && e.target.closest('.mini[data-uid]');
+  if (m) showPeek(m); else $('#peek').hidden = true;
+});
+document.addEventListener('pointerout', (e) => { if (e.pointerType !== 'touch' && e.target.closest && e.target.closest('.mini[data-uid]')) $('#peek').hidden = true; });
+// On touch screens, tapping a small card shows it for a few seconds.
+document.addEventListener('click', (e) => {
+  const m = e.target.closest && e.target.closest('.mini[data-uid]');
+  if (!m) return;
+  showPeek(m);
+  clearTimeout(peekTimer);
+  peekTimer = setTimeout(() => { $('#peek').hidden = true; }, 3000);
+});
+// Browsers only allow sound after the first tap or key press.
+// Every button, pile and card the player can press answers with a click.
+document.addEventListener('pointerdown', (e) => {
+  SFX.unlock(); BGM.start();
+  const hit = e.target.closest && e.target.closest('button, [data-pile], .cardpick, .mini[data-uid]');
+  if (hit && !hit.disabled) SFX.play('click');
+}, { passive: true });
+document.addEventListener('keydown', () => { SFX.unlock(); BGM.start(); });
+
+syncMusicBtn();
+syncSoundBtn();
+syncSpeedBtn();
+syncPauseBtn();
+renderTop();
+})();
+</script>
